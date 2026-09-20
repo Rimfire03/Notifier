@@ -73,10 +73,3 @@ data:
 ```
 
 ---
-
-## 🔢 Versioning
-
-Versions follow the `x.yy` scheme:
-- `x`: hundreds digit of the commit count
-- `yy`: tens + units digit of the commit count
-*(Example: commit 152 = v1.52)*
