@@ -1,0 +1,50 @@
+name: Release & Versioning
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  version_and_release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Calculate version from commit count
+        id: versioning
+        run: |
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          X=$((COMMIT_COUNT / 100))
+          YY=$(printf "%02d" $((COMMIT_COUNT % 100)))
+          VERSION="v${X}.${YY}"
+          RAW_VERSION="${X}.${YY}"
+          echo "COMMIT_COUNT=${COMMIT_COUNT}"
+          echo "VERSION=${VERSION}"
+          echo "RAW_VERSION=${RAW_VERSION}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "raw_version=${RAW_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Update manifest.json version
+        run: |
+          RAW_VERSION="${{ steps.versioning.outputs.raw_version }}"
+          python -c "
+          import json
+          with open('custom_components/notifier/manifest.json', 'r') as f:
+              data = json.load(f)
+          data['version'] = '${RAW_VERSION}'
+          with open('custom_components/notifier/manifest.json', 'w') as f:
+              json.dump(data, f, indent=2)
+          "
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.versioning.outputs.version }}
+          name: Release ${{ steps.versioning.outputs.version }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

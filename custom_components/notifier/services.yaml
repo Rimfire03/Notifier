@@ -1,0 +1,101 @@
+send:
+  name: Send Notification
+  description: Sends a smart notification via Notifier.
+  fields:
+    action:
+      name: Action / Target
+      description: Target (send_to_all, send_to_present, send_to_absent, send_to_nearest, send_when_present, or send_to_<name>).
+      required: true
+      example: "send_to_present"
+      selector:
+        text:
+    title:
+      name: Title
+      description: Title of the notification.
+      required: false
+      example: "Security Alert"
+      selector:
+        text:
+    message:
+      name: Message
+      description: Message body of the notification.
+      required: true
+      example: "The front door has been opened."
+      selector:
+        text:
+    tag:
+      name: Tag
+      description: Unique tag identifier to group, replace or discard notification.
+      example: "front_door"
+      selector:
+        text:
+    timeout:
+      name: Timeout
+      description: Timeout in seconds after which notification is automatically dismissed.
+      selector:
+        number:
+          min: 0
+          max: 86400
+          unit_of_measurement: s
+    image_url:
+      name: Image URL
+      description: URL of an image to embed.
+      selector:
+        text:
+    click_url:
+      name: Click URL
+      description: URL / Lovelace view to navigate when clicked.
+      selector:
+        text:
+    icon:
+      name: Icon
+      description: Icon (e.g., mdi:shield-alert).
+      selector:
+        text:
+    color:
+      name: Color
+      description: Color name or hex string (e.g., red, #ff6e07).
+      selector:
+        text:
+    persistent:
+      name: Persistent
+      description: Also create a persistent notification in Home Assistant UI.
+      selector:
+        boolean:
+    interuption_level:
+      name: Interruption Level (iOS)
+      description: iOS interruption level (passive, active, time-sensitive, critical).
+      selector:
+        select:
+          options:
+            - passive
+            - active
+            - time-sensitive
+            - critical
+    siri_shortcut_name:
+      name: Siri Shortcut Name
+      description: Siri Shortcut name to run on click.
+      selector:
+        text:
+    callback:
+      name: Actionable Callbacks
+      description: Actionable buttons list.
+      selector:
+        object:
+    until:
+      name: Watchers (Until)
+      description: Conditions under which notification should be discarded automatically.
+      selector:
+        object:
+
+discard:
+  name: Discard Notification
+  description: Dismisses and clears all notifications with a specific tag.
+  fields:
+    tag:
+      name: Tag
+      description: The tag of notifications to dismiss.
+      required: true
+      example: "front_door"
+      selector:
+        text:

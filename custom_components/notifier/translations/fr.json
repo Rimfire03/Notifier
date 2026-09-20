@@ -1,0 +1,117 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configuration de Notifier",
+        "description": "Configurez le capteur de présence principal et le seuil de proximité.",
+        "data": {
+          "home_occupancy_sensor": "Capteur de présence de la maison",
+          "occupied_state": "État quand la maison est occupée (ex: on, Occupée, Home)",
+          "proximity_threshold": "Seuil de proximité (mètres)"
+        }
+      },
+      "menu": {
+        "title": "Menu de configuration Notifier",
+        "description": "Ajoutez des personnes et des appareils fixes à votre configuration Notifier.",
+        "menu_options": {
+          "add_person": "Ajouter une personne",
+          "add_device": "Ajouter un appareil toujours présent (tablette)",
+          "finish": "Terminer & Sauvegarder"
+        }
+      },
+      "add_person": {
+        "title": "Ajouter une personne",
+        "description": "Renseignez les informations de la personne et son service de notification.",
+        "data": {
+          "name": "Prénom / Nom (utilisé pour send_to_<nom>)",
+          "id": "Entité Personne / Tracker",
+          "notification_service": "Service de notification (ex: notify.mobile_app_telephone)",
+          "distance_sensor": "Capteur de distance (optionnel, en mètres)"
+        }
+      },
+      "add_device": {
+        "title": "Ajouter un appareil fixe",
+        "description": "Ajoutez des appareils fixes tels que des tablettes murales ou iPad.",
+        "data": {
+          "name": "Nom de l'appareil",
+          "notification_service": "Service de notification (ex: notify.mobile_app_tablette)"
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Une seule instance de Notifier est autorisée."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options de Notifier",
+        "description": "Choisissez une action pour modifier vos paramètres Notifier.",
+        "menu_options": {
+          "general_settings": "Modifier les paramètres généraux",
+          "add_person": "Ajouter une personne",
+          "manage_persons": "Modifier / Supprimer une personne",
+          "add_device": "Ajouter un appareil fixe",
+          "manage_devices": "Modifier / Supprimer un appareil",
+          "finish": "Enregistrer & Fermer"
+        }
+      },
+      "general_settings": {
+        "title": "Paramètres généraux",
+        "data": {
+          "home_occupancy_sensor": "Capteur de présence de la maison",
+          "occupied_state": "État quand la maison est occupée",
+          "proximity_threshold": "Seuil de proximité (mètres)"
+        }
+      },
+      "add_person": {
+        "title": "Ajouter une personne",
+        "data": {
+          "name": "Prénom / Nom",
+          "id": "Entité Personne",
+          "notification_service": "Service de notification",
+          "distance_sensor": "Capteur de distance (optionnel)"
+        }
+      },
+      "manage_persons": {
+        "title": "Gérer les personnes",
+        "description": "Sélectionnez une personne et choisissez de la modifier ou la supprimer.",
+        "data": {
+          "person_index": "Personne",
+          "action": "Action"
+        }
+      },
+      "edit_person": {
+        "title": "Modifier la personne",
+        "data": {
+          "name": "Prénom / Nom",
+          "id": "Entité Personne",
+          "notification_service": "Service de notification",
+          "distance_sensor": "Capteur de distance (optionnel)"
+        }
+      },
+      "add_device": {
+        "title": "Ajouter un appareil fixe",
+        "data": {
+          "name": "Nom de l'appareil",
+          "notification_service": "Service de notification"
+        }
+      },
+      "manage_devices": {
+        "title": "Gérer les appareils",
+        "description": "Sélectionnez un appareil et choisissez de le modifier ou le supprimer.",
+        "data": {
+          "device_index": "Appareil",
+          "action": "Action"
+        }
+      },
+      "edit_device": {
+        "title": "Modifier l'appareil",
+        "data": {
+          "name": "Nom de l'appareil",
+          "notification_service": "Service de notification"
+        }
+      }
+    }
+  }
+}

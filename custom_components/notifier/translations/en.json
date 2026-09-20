@@ -1,0 +1,117 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Notifier Configuration",
+        "description": "Configure the general presence sensor and proximity threshold.",
+        "data": {
+          "home_occupancy_sensor": "Home Occupancy Sensor",
+          "occupied_state": "State when home is occupied (e.g. on, Occupied, Home)",
+          "proximity_threshold": "Proximity Threshold (meters)"
+        }
+      },
+      "menu": {
+        "title": "Notifier Setup Menu",
+        "description": "Add people and always-home devices to your Notifier configuration.",
+        "menu_options": {
+          "add_person": "Add a Person",
+          "add_device": "Add an Always-Home Device",
+          "finish": "Finish & Save"
+        }
+      },
+      "add_person": {
+        "title": "Add Person",
+        "description": "Enter the person's details and notification service.",
+        "data": {
+          "name": "Name (used in action send_to_<name>)",
+          "id": "Person / Tracker Entity",
+          "notification_service": "Notification Service (e.g. notify.mobile_app_phone)",
+          "distance_sensor": "Distance Sensor (optional, in meters)"
+        }
+      },
+      "add_device": {
+        "title": "Add Always-Home Device",
+        "description": "Add fixed devices like wall tablets or iPads.",
+        "data": {
+          "name": "Device Name",
+          "notification_service": "Notification Service (e.g. notify.mobile_app_ipad)"
+        }
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Only a single configuration of Notifier is allowed."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Notifier Options",
+        "description": "Select an action to modify your Notifier settings.",
+        "menu_options": {
+          "general_settings": "Edit General Settings",
+          "add_person": "Add a Person",
+          "manage_persons": "Edit / Delete a Person",
+          "add_device": "Add an Always-Home Device",
+          "manage_devices": "Edit / Delete a Device",
+          "finish": "Save & Close"
+        }
+      },
+      "general_settings": {
+        "title": "General Settings",
+        "data": {
+          "home_occupancy_sensor": "Home Occupancy Sensor",
+          "occupied_state": "State when home is occupied",
+          "proximity_threshold": "Proximity Threshold (meters)"
+        }
+      },
+      "add_person": {
+        "title": "Add Person",
+        "data": {
+          "name": "Name",
+          "id": "Person Entity",
+          "notification_service": "Notification Service",
+          "distance_sensor": "Distance Sensor (optional)"
+        }
+      },
+      "manage_persons": {
+        "title": "Manage Persons",
+        "description": "Select a person and choose whether to edit or delete.",
+        "data": {
+          "person_index": "Person",
+          "action": "Action"
+        }
+      },
+      "edit_person": {
+        "title": "Edit Person",
+        "data": {
+          "name": "Name",
+          "id": "Person Entity",
+          "notification_service": "Notification Service",
+          "distance_sensor": "Distance Sensor (optional)"
+        }
+      },
+      "add_device": {
+        "title": "Add Device",
+        "data": {
+          "name": "Device Name",
+          "notification_service": "Notification Service"
+        }
+      },
+      "manage_devices": {
+        "title": "Manage Devices",
+        "description": "Select a device and choose whether to edit or delete.",
+        "data": {
+          "device_index": "Device",
+          "action": "Action"
+        }
+      },
+      "edit_device": {
+        "title": "Edit Device",
+        "data": {
+          "name": "Device Name",
+          "notification_service": "Notification Service"
+        }
+      }
+    }
+  }
+}
