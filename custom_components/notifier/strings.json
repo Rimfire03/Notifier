@@ -23,7 +23,7 @@
         "title": "Add Person",
         "description": "Enter the person's details and notification service.",
         "data": {
-          "name": "Name (used in action send_to_<name>)",
+          "name": "Name (used in action send_to_NAME)",
           "id": "Person / Tracker Entity",
           "notification_service": "Notification Service (e.g. notify.mobile_app_phone)",
           "distance_sensor": "Distance Sensor (optional, in meters)"

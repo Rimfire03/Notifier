@@ -23,7 +23,7 @@
         "title": "Ajouter une personne",
         "description": "Renseignez les informations de la personne et son service de notification.",
         "data": {
-          "name": "Prénom / Nom (utilisé pour send_to_<nom>)",
+          "name": "Prénom / Nom (utilisé pour send_to_NOM)",
           "id": "Entité Personne / Tracker",
           "notification_service": "Service de notification (ex: notify.mobile_app_telephone)",
           "distance_sensor": "Capteur de distance (optionnel, en mètres)"
