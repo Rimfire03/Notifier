@@ -8,7 +8,15 @@ send:
       required: true
       example: "send_to_present"
       selector:
-        text:
+        select:
+          custom_value: true
+          mode: dropdown
+          options:
+            - send_to_all
+            - send_to_present
+            - send_to_absent
+            - send_to_nearest
+            - send_when_present
     title:
       name: Title
       description: Title of the notification.

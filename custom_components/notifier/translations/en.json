@@ -113,5 +113,79 @@
         }
       }
     }
+  },
+  "services": {
+    "send": {
+      "name": "Send notification",
+      "description": "Sends a smart notification via Notifier.",
+      "fields": {
+        "action": {
+          "name": "Target",
+          "description": "Target: send_to_all, send_to_present, send_to_absent, send_to_nearest, send_when_present, or send_to_NAME (type the person name)."
+        },
+        "title": {
+          "name": "Title",
+          "description": "Title of the notification."
+        },
+        "message": {
+          "name": "Message",
+          "description": "Message body of the notification."
+        },
+        "tag": {
+          "name": "Tag",
+          "description": "Unique tag to group, replace or discard the notification."
+        },
+        "timeout": {
+          "name": "Timeout",
+          "description": "Seconds after which the notification is dismissed automatically."
+        },
+        "image_url": {
+          "name": "Image URL",
+          "description": "URL of an image to embed."
+        },
+        "click_url": {
+          "name": "Click URL",
+          "description": "URL or dashboard view opened on click."
+        },
+        "icon": {
+          "name": "Icon",
+          "description": "Icon, e.g. mdi:shield-alert."
+        },
+        "color": {
+          "name": "Color",
+          "description": "Color name or hex string, e.g. red or #ff6e07."
+        },
+        "persistent": {
+          "name": "Persistent",
+          "description": "Also create a persistent notification in Home Assistant."
+        },
+        "interuption_level": {
+          "name": "Interruption level (iOS)",
+          "description": "iOS interruption level."
+        },
+        "siri_shortcut_name": {
+          "name": "Siri shortcut name",
+          "description": "Siri shortcut to run on click."
+        },
+        "callback": {
+          "name": "Action buttons",
+          "description": "List of action buttons (YAML), e.g. [{title: Close, event: close_door}]."
+        },
+        "until": {
+          "name": "Auto-discard conditions",
+          "description": "Conditions that discard the notification automatically (YAML), e.g. [{entity_id: light.x, new_state: \"off\"}]."
+        }
+      }
+    },
+    "discard": {
+      "name": "Discard notification",
+      "description": "Dismisses all notifications with a given tag.",
+      "fields": {
+        "tag": {
+          "name": "Tag",
+          "description": "Tag of the notifications to dismiss."
+        }
+      }
+    }
   }
 }

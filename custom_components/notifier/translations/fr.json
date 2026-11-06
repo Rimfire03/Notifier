@@ -113,5 +113,79 @@
         }
       }
     }
+  },
+  "services": {
+    "send": {
+      "name": "Envoyer une notification",
+      "description": "Envoie une notification intelligente via Notifier.",
+      "fields": {
+        "action": {
+          "name": "Cible",
+          "description": "Cible : send_to_all, send_to_present, send_to_absent, send_to_nearest, send_when_present, ou send_to_NOM (saisir le nom de la personne)."
+        },
+        "title": {
+          "name": "Titre",
+          "description": "Titre de la notification."
+        },
+        "message": {
+          "name": "Message",
+          "description": "Corps de la notification."
+        },
+        "tag": {
+          "name": "Tag",
+          "description": "Tag unique pour regrouper, remplacer ou supprimer la notification."
+        },
+        "timeout": {
+          "name": "Délai",
+          "description": "Secondes après lesquelles la notification est supprimée automatiquement."
+        },
+        "image_url": {
+          "name": "URL de l'image",
+          "description": "URL d'une image à intégrer."
+        },
+        "click_url": {
+          "name": "URL au clic",
+          "description": "URL ou vue du tableau de bord ouverte au clic."
+        },
+        "icon": {
+          "name": "Icône",
+          "description": "Icône, ex. mdi:shield-alert."
+        },
+        "color": {
+          "name": "Couleur",
+          "description": "Nom de couleur ou code hexadécimal, ex. red ou #ff6e07."
+        },
+        "persistent": {
+          "name": "Persistante",
+          "description": "Crée aussi une notification persistante dans Home Assistant."
+        },
+        "interuption_level": {
+          "name": "Niveau d'interruption (iOS)",
+          "description": "Niveau d'interruption iOS."
+        },
+        "siri_shortcut_name": {
+          "name": "Nom du raccourci Siri",
+          "description": "Raccourci Siri lancé au clic."
+        },
+        "callback": {
+          "name": "Boutons d'action",
+          "description": "Liste de boutons d'action (YAML), ex. [{title: Fermer, event: close_door}]."
+        },
+        "until": {
+          "name": "Conditions de suppression auto",
+          "description": "Conditions qui suppriment la notification automatiquement (YAML), ex. [{entity_id: light.x, new_state: \"off\"}]."
+        }
+      }
+    },
+    "discard": {
+      "name": "Supprimer une notification",
+      "description": "Supprime toutes les notifications portant un tag donné.",
+      "fields": {
+        "tag": {
+          "name": "Tag",
+          "description": "Tag des notifications à supprimer."
+        }
+      }
+    }
   }
 }
