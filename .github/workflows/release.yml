@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: write
+
 jobs:
   version_and_release:
     runs-on: ubuntu-latest
@@ -39,6 +42,13 @@ jobs:
           with open('custom_components/notifier/manifest.json', 'w') as f:
               json.dump(data, f, indent=2)
           "
+
+      - name: Commit manifest version
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add custom_components/notifier/manifest.json
+          git diff --cached --quiet || (git commit -m "chore: set version ${{ steps.versioning.outputs.raw_version }}" && git push)
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1

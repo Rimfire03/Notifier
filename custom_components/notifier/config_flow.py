@@ -7,7 +7,7 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.core import callback
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
@@ -28,6 +28,22 @@ from .const import (
 )
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def _notify_selector(hass: HomeAssistant) -> selector.SelectSelector:
+    """Dropdown of existing notify services; custom value still allowed."""
+    options = [
+        f"notify.{name}"
+        for name in sorted(hass.services.async_services().get("notify", {}))
+        if name not in ("send_message", "persistent_notification")
+    ]
+    return selector.SelectSelector(
+        selector.SelectSelectorConfig(
+            options=options,
+            custom_value=True,
+            mode=selector.SelectSelectorMode.DROPDOWN,
+        )
+    )
 
 
 class NotifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -94,7 +110,7 @@ class NotifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_PERSON_ID): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain=["person", "device_tracker"])
                 ),
-                vol.Required(CONF_NOTIFICATION_SERVICE): selector.TextSelector(),
+                vol.Required(CONF_NOTIFICATION_SERVICE): _notify_selector(self.hass),
                 vol.Optional(CONF_DISTANCE_SENSOR): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor")
                 ),
@@ -114,7 +130,7 @@ class NotifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         schema = vol.Schema(
             {
                 vol.Required(CONF_DEVICE_NAME): selector.TextSelector(),
-                vol.Required(CONF_NOTIFICATION_SERVICE): selector.TextSelector(),
+                vol.Required(CONF_NOTIFICATION_SERVICE): _notify_selector(self.hass),
             }
         )
 
@@ -142,13 +158,15 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
     """Handle options flow for Notifier."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow."""
-        self.config_entry = config_entry
+        """Initialize options flow (config_entry is a read-only property on recent HA)."""
         self._options: dict[str, Any] = dict(config_entry.data)
         if config_entry.options:
             self._options.update(config_entry.options)
-        self._options.setdefault(CONF_PERSONS, [])
-        self._options.setdefault(CONF_ALWAYS_HOME_DEVICES, [])
+        # Copy lists so editing never mutates the stored entry in place.
+        self._options[CONF_PERSONS] = list(self._options.get(CONF_PERSONS, []))
+        self._options[CONF_ALWAYS_HOME_DEVICES] = list(
+            self._options.get(CONF_ALWAYS_HOME_DEVICES, [])
+        )
         self._selected_item_index: int | None = None
 
     async def async_step_init(
@@ -216,7 +234,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 vol.Required(CONF_PERSON_ID): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain=["person", "device_tracker"])
                 ),
-                vol.Required(CONF_NOTIFICATION_SERVICE): selector.TextSelector(),
+                vol.Required(CONF_NOTIFICATION_SERVICE): _notify_selector(self.hass),
                 vol.Optional(CONF_DISTANCE_SENSOR): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor")
                 ),
@@ -302,10 +320,12 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 vol.Required(
                     CONF_NOTIFICATION_SERVICE,
                     default=person.get(CONF_NOTIFICATION_SERVICE, ""),
-                ): selector.TextSelector(),
+                ): _notify_selector(self.hass),
                 vol.Optional(
                     CONF_DISTANCE_SENSOR,
-                    default=person.get(CONF_DISTANCE_SENSOR, ""),
+                    description={
+                        "suggested_value": person.get(CONF_DISTANCE_SENSOR)
+                    },
                 ): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor")
                 ),
@@ -327,7 +347,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
         schema = vol.Schema(
             {
                 vol.Required(CONF_DEVICE_NAME): selector.TextSelector(),
-                vol.Required(CONF_NOTIFICATION_SERVICE): selector.TextSelector(),
+                vol.Required(CONF_NOTIFICATION_SERVICE): _notify_selector(self.hass),
             }
         )
 
@@ -405,7 +425,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 vol.Required(
                     CONF_NOTIFICATION_SERVICE,
                     default=device.get(CONF_NOTIFICATION_SERVICE, ""),
-                ): selector.TextSelector(),
+                ): _notify_selector(self.hass),
             }
         )
 

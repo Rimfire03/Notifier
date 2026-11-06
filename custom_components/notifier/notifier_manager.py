@@ -1,7 +1,6 @@
 """Core logic and event handling for Notifier."""
 from __future__ import annotations
 
-import asyncio
 import logging
 import time
 from typing import Any, Callable
@@ -432,15 +431,17 @@ class NotifierManager:
             _LOGGER.debug(
                 "Creating persistent notification on HA with id %s", notification_id
             )
+            pn_data = {
+                "message": data.get("message", ""),
+                "notification_id": notification_id,
+            }
+            if data.get("title"):
+                pn_data["title"] = data["title"]
             try:
                 await self.hass.services.async_call(
                     "persistent_notification",
                     "create",
-                    {
-                        "title": data.get("title"),
-                        "message": data.get("message", ""),
-                        "notification_id": notification_id,
-                    },
+                    pn_data,
                     blocking=False,
                 )
             except Exception as err:
@@ -468,7 +469,9 @@ class NotifierManager:
                             w_tag,
                             expected_state,
                         )
-                        asyncio.create_task(self.async_clear_notifications(w_tag))
+                        self.hass.async_create_task(
+                            self.async_clear_notifications(w_tag)
+                        )
 
                 unsub = async_track_state_change_event(
                     self.hass, [entity_id], _until_state_changed

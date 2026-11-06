@@ -95,13 +95,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_update_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Update options when changed."""
-    manager: NotifierManager | None = hass.data.get(DOMAIN, {}).get(entry.entry_id)
-    if manager:
-        config_data = dict(entry.data)
-        if entry.options:
-            config_data.update(entry.options)
-        manager.update_config(config_data)
-        _LOGGER.debug("Notifier configuration updated via UI")
+    # Reload so listeners (occupancy sensor) are rebuilt with the new config.
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
