@@ -11,6 +11,7 @@ send:
         select:
           custom_value: true
           mode: dropdown
+          translation_key: target
           options:
             - send_to_all
             - send_to_present

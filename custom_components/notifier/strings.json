@@ -187,5 +187,16 @@
         }
       }
     }
+  },
+  "selector": {
+    "target": {
+      "options": {
+        "send_to_all": "Everyone (all persons and devices)",
+        "send_to_present": "Persons at home",
+        "send_to_absent": "Persons away",
+        "send_to_nearest": "Nearest person",
+        "send_when_present": "When home is occupied"
+      }
+    }
   }
 }
