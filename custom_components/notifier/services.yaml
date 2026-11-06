@@ -54,7 +54,7 @@ send:
         text:
     color:
       name: Color
-      description: Color name or hex string (e.g., red, #ff6e07).
+      description: "Color name or hex string (e.g., red, #ff6e07)."
       selector:
         text:
     persistent:
