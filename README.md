@@ -4,6 +4,8 @@
 
 **Notifier** is an intelligent notification management integration for Home Assistant (100% UI configurable, no YAML required). It is designed to be fully backwards-compatible with the former AppDaemon `notifier.py` app: **no changes are needed in your existing automations or scripts!**
 
+> 💡 **Credits:** this integration is inspired by the work of [jlpouffier](https://github.com/jlpouffier) on GitHub.
+
 ---
 
 ## ✨ Features
