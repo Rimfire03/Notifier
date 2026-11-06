@@ -169,11 +169,11 @@
         },
         "callback": {
           "name": "Boutons d'action",
-          "description": "Liste de boutons d'action (YAML), ex. [{title: Fermer, event: close_door}]."
+          "description": "Liste de boutons d'action (YAML). Chaque bouton a un titre et un nom d'événement."
         },
         "until": {
           "name": "Conditions de suppression auto",
-          "description": "Conditions qui suppriment la notification automatiquement (YAML), ex. [{entity_id: light.x, new_state: \"off\"}]."
+          "description": "Conditions qui suppriment la notification automatiquement (YAML). Chacune a un entity_id et un new_state."
         }
       }
     },

@@ -169,11 +169,11 @@
         },
         "callback": {
           "name": "Action buttons",
-          "description": "List of action buttons (YAML), e.g. [{title: Close, event: close_door}]."
+          "description": "List of action buttons (YAML). Each button has a title and an event name."
         },
         "until": {
           "name": "Auto-discard conditions",
-          "description": "Conditions that discard the notification automatically (YAML), e.g. [{entity_id: light.x, new_state: \"off\"}]."
+          "description": "Conditions that discard the notification automatically (YAML). Each has an entity_id and a new_state."
         }
       }
     },
