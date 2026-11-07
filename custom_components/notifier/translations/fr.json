@@ -163,7 +163,9 @@
       "monitor_habit": {
         "title": "Règle habitude",
         "data": {
-          "alert_time": "Heure d'envoi de l'alerte"
+          "alert_time": "Heure d'envoi de l'alerte",
+          "habit_days": "Jours d'historique",
+          "habit_factor": "Alerte au-delà de N fois l'habituel"
         },
         "description": "Une fois par jour, à cette heure, les dernières 24 h sont comparées aux 24 h des jours précédents."
       }

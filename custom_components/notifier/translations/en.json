@@ -163,7 +163,9 @@
       "monitor_habit": {
         "title": "Habit rule",
         "data": {
-          "alert_time": "Time the alert is sent"
+          "alert_time": "Time the alert is sent",
+          "habit_days": "Days of history",
+          "habit_factor": "Alert above N times the usual"
         },
         "description": "Once a day, at this time, the last 24 h are compared with the same 24 h on previous days."
       }

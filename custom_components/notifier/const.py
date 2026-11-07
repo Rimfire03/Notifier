@@ -51,6 +51,7 @@ DEFAULT_OCCUPANCY_SENSOR_NAME = "Maison occupée"
 EVENT_NOTIFIER = "NOTIFIER"
 EVENT_NOTIFIER_DISCARD = "NOTIFIER_DISCARD"
 EVENT_MOBILE_APP_ACTION = "mobile_app_notification_action"
+EVENT_CONSUMPTION_NORMAL = "notifier_consumption_normal"
 
 # Actions
 ACTION_SEND_TO_ALL = "send_to_all"

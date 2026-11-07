@@ -23,6 +23,8 @@ from homeassistant.util import dt as dt_util
 from .const import (
     CONF_CONSUMPTION_MONITORS,
     DOMAIN,
+    EVENT_CONSUMPTION_NORMAL,
+    EVENT_MOBILE_APP_ACTION,
     MON_COOLDOWN,
     MON_DAYS,
     MON_ENTITY,
@@ -55,12 +57,16 @@ SAVE_DELAY = 300
 MESSAGES = {
     "fr": {
         "title": "Alerte consommation",
+        "normal": "C'était normal",
+        "close": "Fermer",
         "threshold": "Consommation anormale sur « {name} » : {value:.2f} {unit} en {window:g} min (seuil {limit:g} {unit}).",
         "continuous": "Consommation continue sur « {name} » depuis {value:.1f} h (limite {limit:g} h) : fuite possible.",
         "habit": "Consommation inhabituelle sur « {name} » : {value:.2f} {unit} sur les dernières 24 h (alerte au-delà de {limit:.2f} {unit}).",
     },
     "en": {
         "title": "Consumption alert",
+        "normal": "It was normal",
+        "close": "Close",
         "threshold": "Abnormal consumption on \"{name}\": {value:.2f} {unit} in {window:g} min (limit {limit:g} {unit}).",
         "continuous": "Continuous consumption on \"{name}\" for {value:.1f} h (limit {limit:g} h): possible leak.",
         "habit": "Unusual consumption on \"{name}\": {value:.2f} {unit} over the last 24 h (alert above {limit:.2f} {unit}).",
@@ -228,6 +234,22 @@ class ConsumptionMonitor:
                 self._fire = abnormal
         return self._habit_verdict
 
+    @property
+    def normal_action(self) -> str:
+        return f"CONSUMPTION_NORMAL_{self.id}"
+
+    @property
+    def close_action(self) -> str:
+        return f"CONSUMPTION_CLOSE_{self.id}"
+
+    def acknowledge(self) -> None:
+        """User said the consumption was normal: turn the alert off until the next check."""
+        self._habit_verdict = (False, *self._habit_verdict[1:])
+        if self.alert:
+            self.alert = False
+            for listener in list(self.listeners):
+                listener()
+
     def should_notify(self, now: float, changed: bool) -> bool:
         """Whether an alert message must be sent now (the sensor is already abnormal)."""
         if self.rule == "habit":
@@ -273,12 +295,26 @@ class ConsumptionManager:
         self._unsubs.append(
             async_track_time_interval(self.hass, self._tick, timedelta(minutes=1))
         )
+        self._unsubs.append(
+            self.hass.bus.async_listen(EVENT_MOBILE_APP_ACTION, self._on_action)
+        )
 
     async def async_stop(self) -> None:
         while self._unsubs:
             self._unsubs.pop()()
         if self.monitors:
             await self._store.async_save(self._data())
+
+    @callback
+    def _on_action(self, event: Event) -> None:
+        """'It was normal' button: clear the alert and tell automations."""
+        action = event.data.get("action")
+        for m in self.monitors.values():
+            if action == m.normal_action:
+                m.acknowledge()
+                self.hass.bus.async_fire(
+                    EVENT_CONSUMPTION_NORMAL, {"name": m.name, "entity_id": m.entity}
+                )
 
     @callback
     def _on_state(self, event: Event) -> None:
@@ -316,14 +352,19 @@ class ConsumptionManager:
         message = texts[m.rule].format(
             name=m.name, value=value, limit=limit, unit=m.unit, window=m.window
         )
+        data: dict[str, Any] = {
+            "action": m.target,
+            "title": texts["title"],
+            "message": message,
+            "tag": f"consumption_{m.id}",
+        }
+        if m.rule == "habit":
+            # Any button click also discards the notification (existing tag handling).
+            data["callback"] = [
+                {"title": texts["normal"], "event": m.normal_action},
+                {"title": texts["close"], "event": m.close_action},
+            ]
         try:
-            await self._send(
-                {
-                    "action": m.target,
-                    "title": texts["title"],
-                    "message": message,
-                    "tag": f"consumption_{m.id}",
-                }
-            )
+            await self._send(data)
         except Exception:  # noqa: BLE001 - an alert failure must not stop monitoring
             _LOGGER.exception("Consumption alert for %s could not be sent", m.name)

@@ -111,7 +111,7 @@ In **Configure → Add a consumption monitor**, pick a water or electricity sens
 |------|-----------|
 | Threshold | consumption over the window exceeds the threshold (cumulative: increase; instant: average) |
 | Continuous | the meter keeps moving for N hours without a pause of 1 h or more (possible leak) |
-| Habit | once a day, at the time you choose, the last 24 h exceed 1.5 times the average of the same 24 h over the previous 7 days (needs 3 days of history) |
+| Habit | once a day, at the time you choose, the last 24 h exceed N times (default 1.5) the average of the same 24 h over the previous days (default 7, at least 3 days of history). The alert has two buttons: "It was normal" (clears the sensor, fires the `notifier_consumption_normal` event) and "Close" |
 
 ## 🏷️ Releases
 
@@ -172,7 +172,7 @@ Dans **Configurer → Ajouter une surveillance de consommation**, choisissez un 
 |-------|-------------|
 | Seuil | la consommation sur la fenêtre dépasse le seuil (cumulatif : augmentation ; instantané : moyenne) |
 | Continu | le compteur bouge sans pause d'au moins 1 h pendant N heures (fuite possible) |
-| Habitude | une fois par jour, à l'heure choisie, les dernières 24 h dépassent 1,5 fois la moyenne des mêmes 24 h des 7 jours précédents (3 jours d'historique requis) |
+| Habitude | une fois par jour, à l'heure choisie, les dernières 24 h dépassent N fois (1,5 par défaut) la moyenne des mêmes 24 h des jours précédents (7 par défaut, 3 jours d'historique minimum). L'alerte a deux boutons : « C'était normal » (éteint le capteur, déclenche l'événement `notifier_consumption_normal`) et « Fermer » |
 
 ## 🏷️ Versions
 

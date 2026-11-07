@@ -20,7 +20,9 @@ from .const import (
     CONF_ALWAYS_HOME_DEVICES,
     CONF_CONSUMPTION_MONITORS,
     MON_COOLDOWN,
+    MON_DAYS,
     MON_ENTITY,
+    MON_FACTOR,
     MON_HOURS,
     MON_ID,
     MON_NAME,
@@ -124,9 +126,11 @@ RULE_FIELDS: dict[str, list[tuple[str, Any, dict[str, Any] | str | None]]] = {
         (MON_HOURS, 360, None),
         (MON_COOLDOWN, 60, None),
     ],
-    # Checked once a day over 24 h: history length and sensitivity are fixed in consumption.py.
+    # Checked once a day over 24 h: compared with the average of the previous days.
     "habit": [
         (MON_TIME, "08:00:00", "time"),
+        (MON_DAYS, 7, {"min": 3, "max": 60, "step": 1}),
+        (MON_FACTOR, 1.5, {"min": 1, "step": "any"}),
     ],
 }
 
