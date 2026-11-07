@@ -64,7 +64,7 @@ Copy `custom_components/notifier` into your Home Assistant `custom_components` f
 
 Entirely from the UI: **Settings → Devices & services → Add integration → Notifier**.
 
-1. Home occupancy sensor, occupied state and proximity threshold.
+1. Home occupancy: let Notifier **create the "Home occupied" sensor** (on when at least one configured person is home), or pick an existing sensor and its occupied state. Then the proximity threshold.
 2. Add each **person** (name, `person.*`/`device_tracker.*` entity, notification service, optional distance sensor). The name is used in `send_to_<name>`.
 3. Add **always-home devices** (wall tablets...).
 4. Change anything later via the integration's **Configure** button.
@@ -145,7 +145,7 @@ Copiez `custom_components/notifier` dans le dossier `custom_components` de Home 
 
 Entièrement via l'interface : **Paramètres → Appareils et services → Ajouter une intégration → Notifier**.
 
-1. Capteur de présence de la maison, état « occupé » et seuil de proximité.
+1. Occupation de la maison : laissez Notifier **créer le capteur « Maison occupée »** (actif dès qu'au moins une personne configurée est à la maison), ou choisissez un capteur existant et son état « occupé ». Puis le seuil de proximité.
 2. Ajoutez chaque **personne** (nom, entité `person.*`/`device_tracker.*`, service de notification, capteur de distance optionnel). Le nom sert dans `send_to_<nom>`.
 3. Ajoutez les **appareils toujours présents** (tablettes murales...).
 4. Modifiez tout plus tard avec le bouton **Configurer** de l'intégration.

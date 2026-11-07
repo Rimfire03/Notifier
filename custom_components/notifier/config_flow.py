@@ -13,6 +13,7 @@ from homeassistant.helpers import selector
 
 from .const import (
     CONF_ALWAYS_HOME_DEVICES,
+    CONF_CREATE_OCCUPANCY_SENSOR,
     CONF_DEVICE_NAME,
     CONF_DISTANCE_SENSOR,
     CONF_HOME_OCCUPANCY_SENSOR,
@@ -65,13 +66,22 @@ class NotifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if self._async_current_entries():
             return self.async_abort(reason="single_instance_allowed")
 
+        errors: dict[str, str] = {}
         if user_input is not None:
-            self._data.update(user_input)
-            return await self.async_step_menu()
+            if not user_input.get(CONF_CREATE_OCCUPANCY_SENSOR) and not user_input.get(
+                CONF_HOME_OCCUPANCY_SENSOR
+            ):
+                errors["base"] = "occupancy_required"
+            else:
+                self._data.update(user_input)
+                return await self.async_step_menu()
 
         schema = vol.Schema(
             {
-                vol.Required(CONF_HOME_OCCUPANCY_SENSOR): selector.EntitySelector(),
+                vol.Required(
+                    CONF_CREATE_OCCUPANCY_SENSOR, default=True
+                ): selector.BooleanSelector(),
+                vol.Optional(CONF_HOME_OCCUPANCY_SENSOR): selector.EntitySelector(),
                 vol.Required(
                     CONF_OCCUPIED_STATE, default=DEFAULT_OCCUPIED_STATE
                 ): selector.TextSelector(),
@@ -85,7 +95,7 @@ class NotifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }
         )
 
-        return self.async_show_form(step_id="user", data_schema=schema)
+        return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
 
     async def async_step_menu(
         self, user_input: dict[str, Any] | None = None
@@ -189,15 +199,31 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Edit general settings."""
+        errors: dict[str, str] = {}
         if user_input is not None:
-            self._options.update(user_input)
-            return await self.async_step_init()
+            if not user_input.get(CONF_CREATE_OCCUPANCY_SENSOR) and not user_input.get(
+                CONF_HOME_OCCUPANCY_SENSOR
+            ):
+                errors["base"] = "occupancy_required"
+            else:
+                self._options.update(user_input)
+                # A cleared optional field is absent from user_input: store it explicitly.
+                self._options[CONF_HOME_OCCUPANCY_SENSOR] = user_input.get(
+                    CONF_HOME_OCCUPANCY_SENSOR, ""
+                )
+                return await self.async_step_init()
 
         schema = vol.Schema(
             {
                 vol.Required(
+                    CONF_CREATE_OCCUPANCY_SENSOR,
+                    default=self._options.get(CONF_CREATE_OCCUPANCY_SENSOR, False),
+                ): selector.BooleanSelector(),
+                vol.Optional(
                     CONF_HOME_OCCUPANCY_SENSOR,
-                    default=self._options.get(CONF_HOME_OCCUPANCY_SENSOR),
+                    description={
+                        "suggested_value": self._options.get(CONF_HOME_OCCUPANCY_SENSOR) or None
+                    },
                 ): selector.EntitySelector(),
                 vol.Required(
                     CONF_OCCUPIED_STATE,
@@ -216,7 +242,9 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
             }
         )
 
-        return self.async_show_form(step_id="general_settings", data_schema=schema)
+        return self.async_show_form(
+            step_id="general_settings", data_schema=schema, errors=errors
+        )
 
     async def async_step_add_person(
         self, user_input: dict[str, Any] | None = None

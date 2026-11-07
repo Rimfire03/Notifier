@@ -7,6 +7,7 @@ DOMAIN = "notifier"
 CONF_HOME_OCCUPANCY_SENSOR = "home_occupancy_sensor"
 CONF_OCCUPIED_STATE = "occupied_state"
 CONF_PROXIMITY_THRESHOLD = "proximity_threshold"
+CONF_CREATE_OCCUPANCY_SENSOR = "create_occupancy_sensor"
 CONF_PERSONS = "persons"
 CONF_ALWAYS_HOME_DEVICES = "always_home_devices"
 
@@ -18,6 +19,8 @@ CONF_DISTANCE_SENSOR = "distance_sensor"
 
 # Always home device keys
 CONF_DEVICE_NAME = "name"
+
+OCCUPANCY_SENSOR_UNIQUE_SUFFIX = "home_occupied"
 
 # Defaults
 DEFAULT_PROXIMITY_THRESHOLD = 1000

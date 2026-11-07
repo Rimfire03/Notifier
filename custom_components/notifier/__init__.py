@@ -7,6 +7,7 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
 
@@ -14,6 +15,8 @@ from .const import DOMAIN
 from .notifier_manager import NotifierManager
 
 _LOGGER = logging.getLogger(__name__)
+
+PLATFORMS = [Platform.BINARY_SENSOR]
 
 SERVICE_NOTIFIER_SEND = "send"
 
@@ -59,6 +62,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if entry.options:
         config_data.update(entry.options)
 
+    config_data["entry_id"] = entry.entry_id
+    # Platforms first: the optional occupancy sensor must exist before the manager looks it up.
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
     manager = NotifierManager(hass, config_data)
     await manager.async_setup()
 
@@ -101,6 +108,7 @@ async def async_update_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
+    await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     manager: NotifierManager | None = hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
     if manager:
         await manager.async_unload()

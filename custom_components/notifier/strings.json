@@ -3,9 +3,10 @@
     "step": {
       "user": {
         "title": "Notifier Configuration",
-        "description": "Configure the general presence sensor and proximity threshold.",
+        "description": "Choose how home occupancy is detected, and the proximity threshold.",
         "data": {
-          "home_occupancy_sensor": "Home Occupancy Sensor",
+          "create_occupancy_sensor": "Create the \"Home occupied\" sensor (on when someone is home)",
+          "home_occupancy_sensor": "Or use an existing occupancy sensor",
           "occupied_state": "State when home is occupied (e.g. on, Occupied, Home)",
           "proximity_threshold": "Proximity Threshold (meters)"
         }
@@ -40,6 +41,9 @@
     },
     "abort": {
       "single_instance_allowed": "Only a single configuration of Notifier is allowed."
+    },
+    "error": {
+      "occupancy_required": "Enable the built-in sensor or choose an existing occupancy sensor."
     }
   },
   "options": {
@@ -59,7 +63,8 @@
       "general_settings": {
         "title": "General Settings",
         "data": {
-          "home_occupancy_sensor": "Home Occupancy Sensor",
+          "create_occupancy_sensor": "Create the \"Home occupied\" sensor (on when someone is home)",
+          "home_occupancy_sensor": "Or use an existing occupancy sensor",
           "occupied_state": "State when home is occupied",
           "proximity_threshold": "Proximity Threshold (meters)"
         }
@@ -112,6 +117,9 @@
           "notification_service": "Notification Service"
         }
       }
+    },
+    "error": {
+      "occupancy_required": "Enable the built-in sensor or choose an existing occupancy sensor."
     }
   },
   "services": {
@@ -196,6 +204,13 @@
         "send_to_absent": "Persons away",
         "send_to_nearest": "Nearest person",
         "send_when_present": "When home is occupied"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "home_occupied": {
+        "name": "Home occupied"
       }
     }
   }
