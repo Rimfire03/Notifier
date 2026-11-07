@@ -24,6 +24,23 @@ CONF_DEVICE_NAME = "name"
 
 OCCUPANCY_SENSOR_UNIQUE_SUFFIX = "home_occupied"
 
+# Consumption monitoring (optional, independent of notifications)
+CONF_CONSUMPTION_MONITORS = "consumption_monitors"
+CONSUMPTION_DATA = f"{DOMAIN}_consumption"
+CONSUMPTION_UNIQUE_INFIX = "consumption"
+MON_ID = "id"
+MON_NAME = "name"
+MON_ENTITY = "entity"
+MON_TYPE = "type"  # cumulative | instant
+MON_RULE = "rule"  # threshold | continuous | habit
+MON_THRESHOLD = "threshold"
+MON_WINDOW = "window_minutes"
+MON_HOURS = "continuous_hours"
+MON_DAYS = "habit_days"
+MON_FACTOR = "habit_factor"
+MON_COOLDOWN = "cooldown_minutes"
+MON_TARGET = "target"
+
 # Defaults
 DEFAULT_PROXIMITY_THRESHOLD = 1000
 DEFAULT_OCCUPIED_STATE = "on"

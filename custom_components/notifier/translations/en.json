@@ -52,6 +52,8 @@
           "manage_persons": "Edit / Delete a Person",
           "add_device": "Add an Always-Home Device",
           "manage_devices": "Edit / Delete a Device",
+          "add_monitor": "Add a consumption monitor",
+          "manage_monitors": "Edit / Delete a consumption monitor",
           "finish": "Save & Close"
         }
       },
@@ -110,7 +112,54 @@
           "name": "Device Name",
           "notification_service": "Notification Service"
         }
+      },
+      "add_monitor": {
+        "title": "Add a consumption monitor",
+        "data": {
+          "name": "Name of the alert sensor",
+          "entity": "Water / electricity sensor",
+          "type": "Sensor type",
+          "rule": "Detection rule",
+          "threshold": "Threshold (rule: threshold) - in the sensor's unit, per window",
+          "window_minutes": "Window in minutes (rule: threshold)",
+          "continuous_hours": "Continuous hours before alert (rule: continuous)",
+          "habit_days": "Days of history (rule: habit)",
+          "habit_factor": "Alert above N times the usual (rule: habit)",
+          "cooldown_minutes": "Minutes between two alerts",
+          "target": "Who is notified"
+        }
+      },
+      "edit_monitor": {
+        "title": "Edit the consumption monitor",
+        "data": {
+          "name": "Name of the alert sensor",
+          "entity": "Water / electricity sensor",
+          "type": "Sensor type",
+          "rule": "Detection rule",
+          "threshold": "Threshold (rule: threshold) - in the sensor's unit, per window",
+          "window_minutes": "Window in minutes (rule: threshold)",
+          "continuous_hours": "Continuous hours before alert (rule: continuous)",
+          "habit_days": "Days of history (rule: habit)",
+          "habit_factor": "Alert above N times the usual (rule: habit)",
+          "cooldown_minutes": "Minutes between two alerts",
+          "target": "Who is notified"
+        }
+      },
+      "manage_monitors": {
+        "title": "Manage consumption monitors",
+        "description": "Select a monitor and choose to edit or delete it.",
+        "data": {
+          "monitor_index": "Monitor",
+          "action": "Action"
+        },
+        "menu_options": {
+          "add_monitor": "Add a consumption monitor",
+          "init": "Back"
+        }
       }
+    },
+    "error": {
+      "threshold_required": "A threshold is required for the threshold rule."
     }
   },
   "services": {
@@ -196,6 +245,15 @@
         "send_to_nearest": "Nearest person",
         "send_when_present": "When home is occupied"
       }
+    },
+    "consumption_type": {
+      "cumulative": "Cumulative meter (kWh, m³, L)",
+      "instant": "Instant value (W, L/min)"
+    },
+    "consumption_rule": {
+      "threshold": "Threshold over a time window",
+      "continuous": "Continuous flow (possible leak)",
+      "habit": "Unusual compared to usual hours"
     }
   }
 }

@@ -103,6 +103,16 @@ data:
 
 Supported fields: `action`, `title`, `message`, `tag`, `timeout`, `image_url`, `click_url`, `icon`, `color`, `persistent`, `interuption_level`, `siri_shortcut_name`, `callback`, `until`.
 
+### Consumption monitoring (optional)
+
+In **Configure → Add a consumption monitor**, pick a water or electricity sensor (cumulative meter or instant value), a rule and who to notify. Nothing changes if you add none. Each monitor creates a problem `binary_sensor` and sends an alert through the usual targets (`send_to_all`, `send_to_present`...), then waits for its cooldown before repeating.
+
+| Rule | Alert when |
+|------|-----------|
+| Threshold | consumption over the window exceeds the threshold (cumulative: increase; instant: average) |
+| Continuous | the meter keeps moving for N hours without a pause of 1 h or more (possible leak) |
+| Habit | the current hour exceeds N times the average of the same hour over the last days (needs 3 days of history) |
+
 ## 🏷️ Releases
 
 Versions are automatic (`x.yy`, from the commit count): each push to `main` publishes a GitHub release and updates `manifest.json`. HACS offers it as an update.
@@ -153,6 +163,16 @@ Entièrement via l'interface : **Paramètres → Appareils et services → Ajout
 ## 🚀 Utilisation
 
 Mêmes exemples que dans la section anglaise ci-dessus (événement `NOTIFIER` ou service `notifier.send`).
+
+### Surveillance de la consommation (optionnelle)
+
+Dans **Configurer → Ajouter une surveillance de consommation**, choisissez un capteur d'eau ou d'électricité (compteur cumulatif ou valeur instantanée), une règle et qui notifier. Rien ne change si vous n'en ajoutez aucune. Chaque surveillance crée un `binary_sensor` de type problème et envoie l'alerte par les cibles habituelles (`send_to_all`, `send_to_present`...), puis attend son délai avant de répéter.
+
+| Règle | Alerte quand |
+|-------|-------------|
+| Seuil | la consommation sur la fenêtre dépasse le seuil (cumulatif : augmentation ; instantané : moyenne) |
+| Continu | le compteur bouge sans pause d'au moins 1 h pendant N heures (fuite possible) |
+| Habitude | l'heure en cours dépasse N fois la moyenne de la même heure des derniers jours (3 jours d'historique requis) |
 
 ## 🏷️ Versions
 

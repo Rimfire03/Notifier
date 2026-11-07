@@ -11,7 +11,8 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers import config_validation as cv
 
-from .const import DOMAIN
+from .const import CONSUMPTION_DATA, DOMAIN
+from .consumption import ConsumptionManager
 from .notifier_manager import NotifierManager
 
 _LOGGER = logging.getLogger(__name__)
@@ -63,6 +64,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         config_data.update(entry.options)
 
     config_data["entry_id"] = entry.entry_id
+
+    async def async_send(data: dict[str, Any]) -> None:
+        if (mgr := hass.data[DOMAIN].get(entry.entry_id)) is not None:
+            await mgr.async_process_notification(data)
+
+    # Created before the platforms: the alert sensors attach to its monitors.
+    consumption = ConsumptionManager(hass, entry.entry_id, config_data, async_send)
+    hass.data.setdefault(CONSUMPTION_DATA, {})[entry.entry_id] = consumption
+
     # Platforms first: the optional occupancy sensor must exist before the manager looks it up.
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -70,6 +80,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await manager.async_setup()
 
     hass.data[DOMAIN][entry.entry_id] = manager
+    await consumption.async_start()
 
     async def async_handle_send_service(call: ServiceCall) -> None:
         """Handle notifier.send service call."""
@@ -108,8 +119,13 @@ async def async_update_options(hass: HomeAssistant, entry: ConfigEntry) -> None:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
+    consumption: ConsumptionManager | None = hass.data.get(CONSUMPTION_DATA, {}).pop(
+        entry.entry_id, None
+    )
+    if consumption:
+        await consumption.async_stop()
     await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    manager: NotifierManager | None = hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
+    manager:NotifierManager | None = hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
     if manager:
         await manager.async_unload()
 

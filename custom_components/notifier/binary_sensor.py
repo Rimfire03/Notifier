@@ -7,10 +7,14 @@ from homeassistant.components.binary_sensor import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import Event, HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_state_change_event
 
+from .consumption import ConsumptionMonitor
 from .const import (
+    CONSUMPTION_DATA,
+    CONSUMPTION_UNIQUE_INFIX,
     CONF_OCCUPANCY_PERSONS,
     CONF_OCCUPANCY_SENSOR_NAME,
     CONF_PERSON_ID,
@@ -32,7 +36,43 @@ async def async_setup_entry(
     if wanted is not None:
         persons = [p for p in persons if p.get(CONF_PERSON_NAME) in wanted]
     name = config.get(CONF_OCCUPANCY_SENSOR_NAME) or DEFAULT_OCCUPANCY_SENSOR_NAME
-    async_add_entities([HomeOccupiedSensor(unique_id, name, persons)])
+    entities: list[BinarySensorEntity] = [HomeOccupiedSensor(unique_id, name, persons)]
+
+    consumption = hass.data.get(CONSUMPTION_DATA, {}).get(entry.entry_id)
+    monitors = consumption.monitors if consumption else {}
+    entities += [ConsumptionAlertSensor(entry.entry_id, m) for m in monitors.values()]
+
+    # Drop the alert sensors of deleted monitors.
+    prefix = f"{entry.entry_id}_{CONSUMPTION_UNIQUE_INFIX}_"
+    registry = er.async_get(hass)
+    for reg in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if reg.unique_id.startswith(prefix) and reg.unique_id[len(prefix):] not in monitors:
+            registry.async_remove(reg.entity_id)
+
+    async_add_entities(entities)
+
+
+class ConsumptionAlertSensor(BinarySensorEntity):
+    """On while a consumption monitor reports abnormal consumption."""
+
+    _attr_should_poll = False
+    _attr_device_class = BinarySensorDeviceClass.PROBLEM
+
+    def __init__(self, entry_id: str, monitor: ConsumptionMonitor) -> None:
+        self._monitor = monitor
+        self._attr_unique_id = f"{entry_id}_{CONSUMPTION_UNIQUE_INFIX}_{monitor.id}"
+        self._attr_name = monitor.name
+        self._attr_extra_state_attributes = {
+            "entity": monitor.entity,
+            "rule": monitor.rule,
+        }
+
+    @property
+    def is_on(self) -> bool:
+        return self._monitor.alert
+
+    async def async_added_to_hass(self) -> None:
+        self.async_on_remove(self._monitor.add_listener(self.async_write_ha_state))
 
 
 class HomeOccupiedSensor(BinarySensorEntity):

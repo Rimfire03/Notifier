@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import uuid
 from typing import Any
 
 import voluptuous as vol
@@ -12,7 +13,24 @@ from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 
 from .const import (
+    ACTION_SEND_TO_ABSENT,
+    ACTION_SEND_TO_ALL,
+    ACTION_SEND_TO_NEAREST,
+    ACTION_SEND_TO_PRESENT,
     CONF_ALWAYS_HOME_DEVICES,
+    CONF_CONSUMPTION_MONITORS,
+    MON_COOLDOWN,
+    MON_DAYS,
+    MON_ENTITY,
+    MON_FACTOR,
+    MON_HOURS,
+    MON_ID,
+    MON_NAME,
+    MON_RULE,
+    MON_TARGET,
+    MON_THRESHOLD,
+    MON_TYPE,
+    MON_WINDOW,
     CONF_DEVICE_NAME,
     CONF_DISTANCE_SENSOR,
     CONF_NOTIFICATION_SERVICE,
@@ -180,6 +198,8 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 "manage_persons",
                 "add_device",
                 "manage_devices",
+                "add_monitor",
+                "manage_monitors",
                 "finish",
             ],
         )
@@ -464,6 +484,153 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
         )
 
         return self.async_show_form(step_id="edit_device", data_schema=schema)
+
+    def _monitor_schema(self, m: dict[str, Any]) -> vol.Schema:
+        """Form for one consumption monitor, prefilled from m."""
+
+        def req(key: str, default: Any = None) -> vol.Required:
+            value = m.get(key, default)
+            return vol.Required(key, default=value) if value is not None else vol.Required(key)
+
+        def opt(key: str, default: Any = None) -> vol.Optional:
+            return vol.Optional(key, description={"suggested_value": m.get(key, default)})
+
+        def number(**kwargs: Any) -> selector.NumberSelector:
+            return selector.NumberSelector(
+                selector.NumberSelectorConfig(mode=selector.NumberSelectorMode.BOX, **kwargs)
+            )
+
+        def choice(options: list[str], key: str, **kwargs: Any) -> selector.SelectSelector:
+            return selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=options,
+                    mode=selector.SelectSelectorMode.DROPDOWN,
+                    translation_key=key,
+                    **kwargs,
+                )
+            )
+
+        return vol.Schema(
+            {
+                req(MON_NAME): selector.TextSelector(),
+                req(MON_ENTITY): selector.EntitySelector(
+                    selector.EntitySelectorConfig(domain="sensor")
+                ),
+                req(MON_TYPE, "cumulative"): choice(
+                    ["cumulative", "instant"], "consumption_type"
+                ),
+                req(MON_RULE, "threshold"): choice(
+                    ["threshold", "continuous", "habit"], "consumption_rule"
+                ),
+                opt(MON_THRESHOLD): number(min=0, step="any"),
+                opt(MON_WINDOW, 60): number(min=1, max=1440, step=1, unit_of_measurement="min"),
+                opt(MON_HOURS, 6): number(min=0.5, max=72, step="any", unit_of_measurement="h"),
+                opt(MON_DAYS, 7): number(min=3, max=60, step=1, unit_of_measurement="j"),
+                opt(MON_FACTOR, 2): number(min=1, step="any"),
+                opt(MON_COOLDOWN, 60): number(min=1, max=10080, step=1, unit_of_measurement="min"),
+                req(MON_TARGET, ACTION_SEND_TO_ALL): choice(
+                    [
+                        ACTION_SEND_TO_ALL,
+                        ACTION_SEND_TO_PRESENT,
+                        ACTION_SEND_TO_ABSENT,
+                        ACTION_SEND_TO_NEAREST,
+                    ],
+                    "target",
+                    custom_value=True,
+                ),
+            }
+        )
+
+    @staticmethod
+    def _monitor_errors(user_input: dict[str, Any] | None) -> dict[str, str]:
+        if (
+            user_input is not None
+            and user_input.get(MON_RULE) == "threshold"
+            and not user_input.get(MON_THRESHOLD)
+        ):
+            return {MON_THRESHOLD: "threshold_required"}
+        return {}
+
+    async def async_step_add_monitor(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Add a consumption monitor."""
+        errors = self._monitor_errors(user_input)
+        if user_input is not None and not errors:
+            monitors = list(self._options.get(CONF_CONSUMPTION_MONITORS, []))
+            monitors.append({**user_input, MON_ID: uuid.uuid4().hex[:8]})
+            self._options[CONF_CONSUMPTION_MONITORS] = monitors
+            return await self.async_step_init()
+        return self.async_show_form(
+            step_id="add_monitor",
+            data_schema=self._monitor_schema(user_input or {}),
+            errors=errors,
+        )
+
+    async def async_step_manage_monitors(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Select a consumption monitor to edit or remove."""
+        monitors = self._options.get(CONF_CONSUMPTION_MONITORS, [])
+        if not monitors:
+            return self.async_show_menu(
+                step_id="manage_monitors",
+                menu_options=["add_monitor", "init"],
+            )
+
+        if user_input is not None:
+            idx = int(user_input["monitor_index"])
+            if user_input.get("action") == "delete":
+                monitors.pop(idx)
+                self._options[CONF_CONSUMPTION_MONITORS] = monitors
+                return await self.async_step_init()
+            self._selected_item_index = idx
+            return await self.async_step_edit_monitor()
+
+        schema = vol.Schema(
+            {
+                vol.Required("monitor_index"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=[
+                            selector.SelectOptionDict(
+                                value=str(i), label=f"{m.get(MON_NAME)} ({m.get(MON_ENTITY)})"
+                            )
+                            for i, m in enumerate(monitors)
+                        ]
+                    )
+                ),
+                vol.Required("action", default="edit"): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=[
+                            selector.SelectOptionDict(value="edit", label="Edit"),
+                            selector.SelectOptionDict(value="delete", label="Delete"),
+                        ]
+                    )
+                ),
+            }
+        )
+        return self.async_show_form(step_id="manage_monitors", data_schema=schema)
+
+    async def async_step_edit_monitor(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Edit a consumption monitor."""
+        idx = self._selected_item_index
+        monitors = self._options.get(CONF_CONSUMPTION_MONITORS, [])
+        if idx is None or idx >= len(monitors):
+            return await self.async_step_init()
+
+        errors = self._monitor_errors(user_input)
+        if user_input is not None and not errors:
+            monitors[idx] = {**user_input, MON_ID: monitors[idx][MON_ID]}
+            self._options[CONF_CONSUMPTION_MONITORS] = monitors
+            self._selected_item_index = None
+            return await self.async_step_init()
+        return self.async_show_form(
+            step_id="edit_monitor",
+            data_schema=self._monitor_schema(user_input or monitors[idx]),
+            errors=errors,
+        )
 
     async def async_step_finish(
         self, user_input: dict[str, Any] | None = None

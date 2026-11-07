@@ -52,6 +52,8 @@
           "manage_persons": "Modifier / Supprimer une personne",
           "add_device": "Ajouter un appareil fixe",
           "manage_devices": "Modifier / Supprimer un appareil",
+          "add_monitor": "Ajouter une surveillance de consommation",
+          "manage_monitors": "Modifier / Supprimer une surveillance de consommation",
           "finish": "Enregistrer & Fermer"
         }
       },
@@ -110,7 +112,54 @@
           "name": "Nom de l'appareil",
           "notification_service": "Service de notification"
         }
+      },
+      "add_monitor": {
+        "title": "Ajouter une surveillance de consommation",
+        "data": {
+          "name": "Nom du capteur d'alerte",
+          "entity": "Capteur d'eau / d'électricité",
+          "type": "Type de capteur",
+          "rule": "Règle de détection",
+          "threshold": "Seuil (règle : seuil), dans l'unité du capteur, par fenêtre",
+          "window_minutes": "Fenêtre en minutes (règle : seuil)",
+          "continuous_hours": "Heures continues avant alerte (règle : continu)",
+          "habit_days": "Jours d'historique (règle : habitude)",
+          "habit_factor": "Alerte au-delà de N fois l'habituel (règle : habitude)",
+          "cooldown_minutes": "Minutes entre deux alertes",
+          "target": "Qui est notifié"
+        }
+      },
+      "edit_monitor": {
+        "title": "Modifier la surveillance de consommation",
+        "data": {
+          "name": "Nom du capteur d'alerte",
+          "entity": "Capteur d'eau / d'électricité",
+          "type": "Type de capteur",
+          "rule": "Règle de détection",
+          "threshold": "Seuil (règle : seuil), dans l'unité du capteur, par fenêtre",
+          "window_minutes": "Fenêtre en minutes (règle : seuil)",
+          "continuous_hours": "Heures continues avant alerte (règle : continu)",
+          "habit_days": "Jours d'historique (règle : habitude)",
+          "habit_factor": "Alerte au-delà de N fois l'habituel (règle : habitude)",
+          "cooldown_minutes": "Minutes entre deux alertes",
+          "target": "Qui est notifié"
+        }
+      },
+      "manage_monitors": {
+        "title": "Gérer les surveillances de consommation",
+        "description": "Sélectionnez une surveillance et choisissez de la modifier ou la supprimer.",
+        "data": {
+          "monitor_index": "Surveillance",
+          "action": "Action"
+        },
+        "menu_options": {
+          "add_monitor": "Ajouter une surveillance de consommation",
+          "init": "Retour"
+        }
       }
+    },
+    "error": {
+      "threshold_required": "Un seuil est obligatoire pour la règle « seuil »."
     }
   },
   "services": {
@@ -196,6 +245,15 @@
         "send_to_nearest": "Personne la plus proche",
         "send_when_present": "Quand la maison est occupée"
       }
+    },
+    "consumption_type": {
+      "cumulative": "Compteur cumulatif (kWh, m³, L)",
+      "instant": "Valeur instantanée (W, L/min)"
+    },
+    "consumption_rule": {
+      "threshold": "Seuil sur une fenêtre de temps",
+      "continuous": "Débit continu (fuite possible)",
+      "habit": "Inhabituel par rapport aux heures habituelles"
     }
   }
 }
