@@ -1,6 +1,9 @@
 {
   "domain": "notifier",
   "name": "Notifier",
+  "after_dependencies": [
+    "energy"
+  ],
   "codeowners": [
     "@Rimfire03"
   ],

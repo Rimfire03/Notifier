@@ -21,6 +21,7 @@ from .const import (
     CONF_CONSUMPTION_MONITORS,
     MON_COOLDOWN,
     MON_DAYS,
+    MON_ENERGY_SOURCE,
     MON_ENTITY,
     MON_FACTOR,
     MON_HOURS,
@@ -51,6 +52,7 @@ _LOGGER = logging.getLogger(__name__)
 LABELS = {
     "fr": {
         "manage_action": {"edit": "Modifier", "delete": "Supprimer"},
+        "energy_kind": {"grid": "Réseau", "gas": "Gaz", "water": "Eau", "device": "Appareil"},
         "consumption_type": {
             "cumulative": "Compteur cumulatif (kWh, m³, L)",
             "instant": "Valeur instantanée (W, L/min)",
@@ -69,6 +71,7 @@ LABELS = {
     },
     "en": {
         "manage_action": {"edit": "Edit", "delete": "Delete"},
+        "energy_kind": {"grid": "Grid", "gas": "Gas", "water": "Water", "device": "Device"},
         "consumption_type": {
             "cumulative": "Cumulative meter (kWh, m³, L)",
             "instant": "Instant value (W, L/min)",
@@ -92,6 +95,39 @@ def _options(hass: HomeAssistant, group: str, values: list[str]) -> list[selecto
     """Labelled options. Built here because the options-flow dialog does not load selector translations."""
     labels = LABELS["fr" if hass.config.language.startswith("fr") else "en"][group]
     return [selector.SelectOptionDict(value=v, label=labels[v]) for v in values]
+
+
+async def _energy_sources(hass: HomeAssistant) -> list[selector.SelectOptionDict]:
+    """Consumption sources of the Energy dashboard that are real entities (name picked from it)."""
+    try:
+        # Imported lazily: the energy integration is optional.
+        from homeassistant.components.energy.data import async_get_manager
+
+        prefs = (await async_get_manager(hass)).data or {}
+    except Exception:  # noqa: BLE001 - no energy dashboard: only manual entry is offered
+        return []
+
+    found: list[tuple[str | None, str]] = []
+    for src in prefs.get("energy_sources", []):
+        kind = src.get("type")
+        if kind == "grid":
+            found += [(f.get("stat_energy_from"), "grid") for f in src.get("flow_from", [])]
+        elif kind in ("gas", "water"):
+            found.append((src.get("stat_energy_from"), kind))
+    found += [(d.get("stat_consumption"), "device") for d in prefs.get("device_consumption", [])]
+
+    kinds = LABELS["fr" if hass.config.language.startswith("fr") else "en"]["energy_kind"]
+    options: list[selector.SelectOptionDict] = []
+    seen: set[str] = set()
+    for stat_id, kind in found:
+        state = hass.states.get(stat_id) if stat_id else None
+        if state is None or stat_id in seen:  # external statistics are not entities
+            continue
+        seen.add(stat_id)
+        options.append(
+            selector.SelectOptionDict(value=stat_id, label=f"{kinds[kind]} – {state.name}")
+        )
+    return options
 
 
 def _notify_selector(hass: HomeAssistant) -> selector.SelectSelector:
@@ -598,14 +634,24 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
 
         return self.async_show_form(step_id="edit_device", data_schema=schema)
 
-    def _common_schema(self, m: dict[str, Any]) -> vol.Schema:
-        """Fields shared by every rule."""
+    def _common_schema(
+        self, m: dict[str, Any], energy: list[selector.SelectOptionDict]
+    ) -> vol.Schema:
+        """Fields shared by every rule. Source: Energy dashboard list or any sensor."""
+        source: dict[Any, Any] = {}
+        if energy:
+            source[vol.Optional(MON_ENERGY_SOURCE)] = selector.SelectSelector(
+                selector.SelectSelectorConfig(
+                    options=energy, mode=selector.SelectSelectorMode.DROPDOWN
+                )
+            )
+        source[
+            vol.Optional(MON_ENTITY, description={"suggested_value": m.get(MON_ENTITY)})
+        ] = selector.EntitySelector(selector.EntitySelectorConfig(domain="sensor"))
         return vol.Schema(
             {
                 _req(m, MON_NAME): selector.TextSelector(),
-                _req(m, MON_ENTITY): selector.EntitySelector(
-                    selector.EntitySelectorConfig(domain="sensor")
-                ),
+                **source,
                 _req(m, MON_TYPE, "cumulative"): _choice(
                     self.hass, "consumption_type", ["cumulative", "instant"]
                 ),
@@ -629,11 +675,21 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
     async def _common_step(
         self, step_id: str, user_input: dict[str, Any] | None
     ) -> FlowResult:
+        energy = await _energy_sources(self.hass)
+        errors: dict[str, str] = {}
         if user_input is not None:
-            self._draft = _store_durations(user_input)
-            return await getattr(self, f"async_step_monitor_{user_input[MON_RULE]}")()
+            draft = _store_durations(user_input)
+            if chosen := draft.pop(MON_ENERGY_SOURCE, None):
+                # Energy dashboard counters are always cumulative.
+                draft[MON_ENTITY], draft[MON_TYPE] = chosen, "cumulative"
+            if draft.get(MON_ENTITY):
+                self._draft = draft
+                return await getattr(self, f"async_step_monitor_{draft[MON_RULE]}")()
+            errors["base"] = "entity_required"
         return self.async_show_form(
-            step_id=step_id, data_schema=self._common_schema(self._source)
+            step_id=step_id,
+            data_schema=self._common_schema({**self._source, **(user_input or {})}, energy),
+            errors=errors,
         )
 
     async def _rule_step(

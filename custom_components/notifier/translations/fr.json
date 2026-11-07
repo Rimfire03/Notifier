@@ -117,7 +117,8 @@
         "title": "Ajouter une surveillance de consommation",
         "data": {
           "name": "Nom du capteur d'alerte",
-          "entity": "Capteur d'eau / d'électricité",
+          "energy_source": "Source du tableau Énergie",
+          "entity": "Ou un autre capteur",
           "type": "Type de capteur",
           "rule": "Règle de détection",
           "target": "Qui est notifié"
@@ -127,7 +128,8 @@
         "title": "Modifier la surveillance de consommation",
         "data": {
           "name": "Nom du capteur d'alerte",
-          "entity": "Capteur d'eau / d'électricité",
+          "energy_source": "Source du tableau Énergie",
+          "entity": "Ou un autre capteur",
           "type": "Type de capteur",
           "rule": "Règle de détection",
           "target": "Qui est notifié"
@@ -169,6 +171,9 @@
         },
         "description": "Une fois par jour, à cette heure, les dernières 24 h sont comparées aux 24 h des jours précédents."
       }
+    },
+    "error": {
+      "entity_required": "Choisissez une source du tableau Énergie ou un capteur."
     }
   },
   "services": {

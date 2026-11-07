@@ -117,7 +117,8 @@
         "title": "Add a consumption monitor",
         "data": {
           "name": "Name of the alert sensor",
-          "entity": "Water / electricity sensor",
+          "energy_source": "Energy dashboard source",
+          "entity": "Or any other sensor",
           "type": "Sensor type",
           "rule": "Detection rule",
           "target": "Who is notified"
@@ -127,7 +128,8 @@
         "title": "Edit the consumption monitor",
         "data": {
           "name": "Name of the alert sensor",
-          "entity": "Water / electricity sensor",
+          "energy_source": "Energy dashboard source",
+          "entity": "Or any other sensor",
           "type": "Sensor type",
           "rule": "Detection rule",
           "target": "Who is notified"
@@ -169,6 +171,9 @@
         },
         "description": "Once a day, at this time, the last 24 h are compared with the same 24 h on previous days."
       }
+    },
+    "error": {
+      "entity_required": "Choose an Energy dashboard source or a sensor."
     }
   },
   "services": {

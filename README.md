@@ -109,7 +109,7 @@ Supported fields: `action`, `title`, `message`, `tag`, `timeout`, `image_url`, `
 
 Nothing changes if you add no monitor. In **Configure → Add a consumption monitor**:
 
-1. **First screen:** name, water / electricity sensor, sensor type (cumulative meter such as kWh / m³ / L, or instant value such as W / L/min), detection rule, and who is notified (`send_to_all`, `send_to_present`...).
+1. **First screen:** name, source (pick a counter already shown in your **Energy dashboard** — grid, gas, water, devices — or any other sensor), sensor type (cumulative meter such as kWh / m³ / L, or instant value such as W / L/min), detection rule, and who is notified (`send_to_all`, `send_to_present`...).
 2. **Second screen:** only the fields of the chosen rule (table below). Durations are entered in hours / minutes.
 
 Each monitor creates a problem `binary_sensor` (named after the monitor) that you can also use in your own automations. Edit or delete monitors with **Configure → Edit / Delete a consumption monitor**.
@@ -175,7 +175,7 @@ Mêmes exemples que dans la section anglaise ci-dessus (événement `NOTIFIER` o
 
 Rien ne change si vous n'ajoutez aucune surveillance. Dans **Configurer → Ajouter une surveillance de consommation** :
 
-1. **Premier écran :** nom, capteur d'eau / d'électricité, type de capteur (compteur cumulatif en kWh / m³ / L, ou valeur instantanée en W / L/min), règle de détection et qui est notifié (`send_to_all`, `send_to_present`...).
+1. **Premier écran :** nom, source (choisissez un compteur déjà affiché dans votre **tableau de bord Énergie** — réseau, gaz, eau, appareils — ou n'importe quel autre capteur), type de capteur (compteur cumulatif en kWh / m³ / L, ou valeur instantanée en W / L/min), règle de détection et qui est notifié (`send_to_all`, `send_to_present`...).
 2. **Second écran :** uniquement les champs de la règle choisie (tableau ci-dessous). Les durées se saisissent en heures / minutes.
 
 Chaque surveillance crée un `binary_sensor` de type problème (du nom de la surveillance), utilisable aussi dans vos automatisations. Modifiez ou supprimez les surveillances via **Configurer → Modifier / Supprimer une surveillance de consommation**.
