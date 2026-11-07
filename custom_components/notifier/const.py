@@ -9,6 +9,7 @@ CONF_OCCUPIED_STATE = "occupied_state"
 CONF_PROXIMITY_THRESHOLD = "proximity_threshold"
 CONF_CREATE_OCCUPANCY_SENSOR = "create_occupancy_sensor"
 CONF_OCCUPANCY_PERSONS = "occupancy_persons"
+CONF_OCCUPANCY_SENSOR_NAME = "occupancy_sensor_name"
 CONF_PERSONS = "persons"
 CONF_ALWAYS_HOME_DEVICES = "always_home_devices"
 
@@ -26,6 +27,7 @@ OCCUPANCY_SENSOR_UNIQUE_SUFFIX = "home_occupied"
 # Defaults
 DEFAULT_PROXIMITY_THRESHOLD = 1000
 DEFAULT_OCCUPIED_STATE = "on"
+DEFAULT_OCCUPANCY_SENSOR_NAME = "Maison occupée"
 
 # Events
 EVENT_NOTIFIER = "NOTIFIER"

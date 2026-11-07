@@ -8,7 +8,8 @@
           "create_occupancy_sensor": "Create the \"Home occupied\" sensor (on when someone is home)",
           "home_occupancy_sensor": "Or use an existing occupancy sensor",
           "occupied_state": "State when home is occupied (e.g. on, Occupied, Home)",
-          "proximity_threshold": "Proximity Threshold (meters)"
+          "proximity_threshold": "Proximity Threshold (meters)",
+          "occupancy_sensor_name": "Name of the built-in \"Home occupied\" sensor"
         }
       },
       "menu": {
@@ -67,7 +68,8 @@
           "home_occupancy_sensor": "Or use an existing occupancy sensor",
           "occupied_state": "State when home is occupied",
           "proximity_threshold": "Proximity Threshold (meters)",
-          "occupancy_persons": "Persons counted by the \"Home occupied\" sensor (empty = all)"
+          "occupancy_persons": "Persons counted by the \"Home occupied\" sensor (empty = all)",
+          "occupancy_sensor_name": "Name of the built-in \"Home occupied\" sensor"
         }
       },
       "add_person": {
@@ -205,13 +207,6 @@
         "send_to_absent": "Persons away",
         "send_to_nearest": "Nearest person",
         "send_when_present": "When home is occupied"
-      }
-    }
-  },
-  "entity": {
-    "binary_sensor": {
-      "home_occupied": {
-        "name": "Home occupied"
       }
     }
   }

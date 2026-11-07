@@ -14,9 +14,11 @@ from homeassistant.helpers.event import async_track_state_change_event
 from .const import (
     CONF_CREATE_OCCUPANCY_SENSOR,
     CONF_OCCUPANCY_PERSONS,
+    CONF_OCCUPANCY_SENSOR_NAME,
     CONF_PERSON_ID,
     CONF_PERSON_NAME,
     CONF_PERSONS,
+    DEFAULT_OCCUPANCY_SENSOR_NAME,
     DOMAIN,
     OCCUPANCY_SENSOR_UNIQUE_SUFFIX,
 )
@@ -40,19 +42,19 @@ async def async_setup_entry(
         for p in config.get(CONF_PERSONS, [])
         if p.get(CONF_PERSON_ID) and (not wanted or p.get(CONF_PERSON_NAME) in wanted)
     ]
-    async_add_entities([HomeOccupiedSensor(unique_id, trackers)])
+    name = config.get(CONF_OCCUPANCY_SENSOR_NAME) or DEFAULT_OCCUPANCY_SENSOR_NAME
+    async_add_entities([HomeOccupiedSensor(unique_id, name, trackers)])
 
 
 class HomeOccupiedSensor(BinarySensorEntity):
     """On when any configured person is home."""
 
-    _attr_has_entity_name = True
     _attr_should_poll = False
-    _attr_translation_key = "home_occupied"
     _attr_device_class = BinarySensorDeviceClass.OCCUPANCY
 
-    def __init__(self, unique_id: str, trackers: list[str]) -> None:
+    def __init__(self, unique_id: str, name: str, trackers: list[str]) -> None:
         self._attr_unique_id = unique_id
+        self._attr_name = name
         self._trackers = trackers
         self._attr_is_on = False
 

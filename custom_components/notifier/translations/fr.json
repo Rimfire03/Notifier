@@ -8,7 +8,8 @@
           "create_occupancy_sensor": "Créer le capteur « Maison occupée » (actif quand quelqu'un est présent)",
           "home_occupancy_sensor": "Ou utiliser un capteur d'occupation existant",
           "occupied_state": "État quand la maison est occupée (ex: on, Occupée, Home)",
-          "proximity_threshold": "Seuil de proximité (mètres)"
+          "proximity_threshold": "Seuil de proximité (mètres)",
+          "occupancy_sensor_name": "Nom du capteur intégré « Maison occupée »"
         }
       },
       "menu": {
@@ -67,7 +68,8 @@
           "home_occupancy_sensor": "Ou utiliser un capteur d'occupation existant",
           "occupied_state": "État quand la maison est occupée",
           "proximity_threshold": "Seuil de proximité (mètres)",
-          "occupancy_persons": "Personnes prises en compte par le capteur « Maison occupée » (vide = toutes)"
+          "occupancy_persons": "Personnes prises en compte par le capteur « Maison occupée » (vide = toutes)",
+          "occupancy_sensor_name": "Nom du capteur intégré « Maison occupée »"
         }
       },
       "add_person": {
@@ -205,13 +207,6 @@
         "send_to_absent": "Personnes absentes",
         "send_to_nearest": "Personne la plus proche",
         "send_when_present": "Quand la maison est occupée"
-      }
-    }
-  },
-  "entity": {
-    "binary_sensor": {
-      "home_occupied": {
-        "name": "Maison occupée"
       }
     }
   }

@@ -19,11 +19,13 @@ from .const import (
     CONF_HOME_OCCUPANCY_SENSOR,
     CONF_NOTIFICATION_SERVICE,
     CONF_OCCUPANCY_PERSONS,
+    CONF_OCCUPANCY_SENSOR_NAME,
     CONF_OCCUPIED_STATE,
     CONF_PERSON_ID,
     CONF_PERSON_NAME,
     CONF_PERSONS,
     CONF_PROXIMITY_THRESHOLD,
+    DEFAULT_OCCUPANCY_SENSOR_NAME,
     DEFAULT_OCCUPIED_STATE,
     DEFAULT_PROXIMITY_THRESHOLD,
     DOMAIN,
@@ -82,6 +84,9 @@ class NotifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 vol.Required(
                     CONF_CREATE_OCCUPANCY_SENSOR, default=True
                 ): selector.BooleanSelector(),
+                vol.Optional(
+                    CONF_OCCUPANCY_SENSOR_NAME, default=DEFAULT_OCCUPANCY_SENSOR_NAME
+                ): selector.TextSelector(),
                 vol.Optional(CONF_HOME_OCCUPANCY_SENSOR): selector.EntitySelector(),
                 vol.Required(
                     CONF_OCCUPIED_STATE, default=DEFAULT_OCCUPIED_STATE
@@ -227,6 +232,12 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                         "suggested_value": self._options.get(CONF_HOME_OCCUPANCY_SENSOR) or None
                     },
                 ): selector.EntitySelector(),
+                vol.Optional(
+                    CONF_OCCUPANCY_SENSOR_NAME,
+                    default=self._options.get(
+                        CONF_OCCUPANCY_SENSOR_NAME, DEFAULT_OCCUPANCY_SENSOR_NAME
+                    ),
+                ): selector.TextSelector(),
                 vol.Optional(
                     CONF_OCCUPANCY_PERSONS,
                     description={
