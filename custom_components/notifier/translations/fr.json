@@ -120,11 +120,6 @@
           "entity": "Capteur d'eau / d'électricité",
           "type": "Type de capteur",
           "rule": "Règle de détection",
-          "threshold": "Seuil (règle : seuil), dans l'unité du capteur, par fenêtre",
-          "window_minutes": "Fenêtre en minutes (règle : seuil)",
-          "continuous_hours": "Heures continues avant alerte (règle : continu)",
-          "habit_days": "Jours d'historique (règle : habitude)",
-          "habit_factor": "Alerte au-delà de N fois l'habituel (règle : habitude)",
           "cooldown_minutes": "Minutes entre deux alertes",
           "target": "Qui est notifié"
         }
@@ -136,11 +131,6 @@
           "entity": "Capteur d'eau / d'électricité",
           "type": "Type de capteur",
           "rule": "Règle de détection",
-          "threshold": "Seuil (règle : seuil), dans l'unité du capteur, par fenêtre",
-          "window_minutes": "Fenêtre en minutes (règle : seuil)",
-          "continuous_hours": "Heures continues avant alerte (règle : continu)",
-          "habit_days": "Jours d'historique (règle : habitude)",
-          "habit_factor": "Alerte au-delà de N fois l'habituel (règle : habitude)",
           "cooldown_minutes": "Minutes entre deux alertes",
           "target": "Qui est notifié"
         }
@@ -156,10 +146,27 @@
           "add_monitor": "Ajouter une surveillance de consommation",
           "init": "Retour"
         }
+      },
+      "monitor_threshold": {
+        "title": "Règle seuil",
+        "data": {
+          "threshold": "Seuil (dans l'unité du capteur, par fenêtre)",
+          "window_minutes": "Fenêtre en minutes"
+        }
+      },
+      "monitor_continuous": {
+        "title": "Règle débit continu",
+        "data": {
+          "continuous_hours": "Heures continues avant alerte"
+        }
+      },
+      "monitor_habit": {
+        "title": "Règle habitude",
+        "data": {
+          "habit_days": "Jours d'historique",
+          "habit_factor": "Alerte au-delà de N fois l'habituel"
+        }
       }
-    },
-    "error": {
-      "threshold_required": "Un seuil est obligatoire pour la règle « seuil »."
     }
   },
   "services": {

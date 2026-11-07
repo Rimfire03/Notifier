@@ -120,11 +120,6 @@
           "entity": "Water / electricity sensor",
           "type": "Sensor type",
           "rule": "Detection rule",
-          "threshold": "Threshold (rule: threshold) - in the sensor's unit, per window",
-          "window_minutes": "Window in minutes (rule: threshold)",
-          "continuous_hours": "Continuous hours before alert (rule: continuous)",
-          "habit_days": "Days of history (rule: habit)",
-          "habit_factor": "Alert above N times the usual (rule: habit)",
           "cooldown_minutes": "Minutes between two alerts",
           "target": "Who is notified"
         }
@@ -136,11 +131,6 @@
           "entity": "Water / electricity sensor",
           "type": "Sensor type",
           "rule": "Detection rule",
-          "threshold": "Threshold (rule: threshold) - in the sensor's unit, per window",
-          "window_minutes": "Window in minutes (rule: threshold)",
-          "continuous_hours": "Continuous hours before alert (rule: continuous)",
-          "habit_days": "Days of history (rule: habit)",
-          "habit_factor": "Alert above N times the usual (rule: habit)",
           "cooldown_minutes": "Minutes between two alerts",
           "target": "Who is notified"
         }
@@ -156,10 +146,27 @@
           "add_monitor": "Add a consumption monitor",
           "init": "Back"
         }
+      },
+      "monitor_threshold": {
+        "title": "Threshold rule",
+        "data": {
+          "threshold": "Threshold (in the sensor's unit, per window)",
+          "window_minutes": "Window in minutes"
+        }
+      },
+      "monitor_continuous": {
+        "title": "Continuous flow rule",
+        "data": {
+          "continuous_hours": "Continuous hours before alert"
+        }
+      },
+      "monitor_habit": {
+        "title": "Habit rule",
+        "data": {
+          "habit_days": "Days of history",
+          "habit_factor": "Alert above N times the usual"
+        }
       }
-    },
-    "error": {
-      "threshold_required": "A threshold is required for the threshold rule."
     }
   },
   "services": {

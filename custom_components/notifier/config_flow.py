@@ -109,6 +109,45 @@ def _notify_selector(hass: HomeAssistant) -> selector.SelectSelector:
     )
 
 
+RULE_FIELDS: dict[str, list[tuple[str, Any, dict[str, Any]]]] = {
+    "threshold": [
+        (MON_THRESHOLD, None, {"min": 0, "step": "any"}),
+        (MON_WINDOW, 60, {"min": 1, "max": 1440, "step": 1, "unit_of_measurement": "min"}),
+    ],
+    "continuous": [
+        (MON_HOURS, 6, {"min": 0.5, "max": 72, "step": "any", "unit_of_measurement": "h"}),
+    ],
+    "habit": [
+        (MON_DAYS, 7, {"min": 3, "max": 60, "step": 1}),
+        (MON_FACTOR, 2, {"min": 1, "step": "any"}),
+    ],
+}
+
+
+def _req(m: dict[str, Any], key: str, default: Any = None) -> vol.Required:
+    """Required key prefilled from m, else from default (no default when both are None)."""
+    value = m.get(key, default)
+    return vol.Required(key, default=value) if value is not None else vol.Required(key)
+
+
+def _number(**kwargs: Any) -> selector.NumberSelector:
+    return selector.NumberSelector(
+        selector.NumberSelectorConfig(mode=selector.NumberSelectorMode.BOX, **kwargs)
+    )
+
+
+def _choice(
+    hass: HomeAssistant, group: str, values: list[str], **kwargs: Any
+) -> selector.SelectSelector:
+    return selector.SelectSelector(
+        selector.SelectSelectorConfig(
+            options=_options(hass, group, values),
+            mode=selector.SelectSelectorMode.DROPDOWN,
+            **kwargs,
+        )
+    )
+
+
 class NotifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Notifier."""
 
@@ -230,6 +269,8 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
             self._options.get(CONF_ALWAYS_HOME_DEVICES, [])
         )
         self._selected_item_index: int | None = None
+        self._draft: dict[str, Any] = {}  # monitor being added/edited (common part)
+        self._source: dict[str, Any] = {}  # its stored values, used as form defaults
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
@@ -524,45 +565,25 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
 
         return self.async_show_form(step_id="edit_device", data_schema=schema)
 
-    def _monitor_schema(self, m: dict[str, Any]) -> vol.Schema:
-        """Form for one consumption monitor, prefilled from m."""
-
-        def req(key: str, default: Any = None) -> vol.Required:
-            value = m.get(key, default)
-            return vol.Required(key, default=value) if value is not None else vol.Required(key)
-
-        def opt(key: str, default: Any = None) -> vol.Optional:
-            return vol.Optional(key, description={"suggested_value": m.get(key, default)})
-
-        def number(**kwargs: Any) -> selector.NumberSelector:
-            return selector.NumberSelector(
-                selector.NumberSelectorConfig(mode=selector.NumberSelectorMode.BOX, **kwargs)
-            )
-
-        def choice(group: str, values: list[str], **kwargs: Any) -> selector.SelectSelector:
-            return selector.SelectSelector(
-                selector.SelectSelectorConfig(
-                    options=_options(self.hass, group, values),
-                    mode=selector.SelectSelectorMode.DROPDOWN,
-                    **kwargs,
-                )
-            )
-
+    def _common_schema(self, m: dict[str, Any]) -> vol.Schema:
+        """Fields shared by every rule."""
         return vol.Schema(
             {
-                req(MON_NAME): selector.TextSelector(),
-                req(MON_ENTITY): selector.EntitySelector(
+                _req(m, MON_NAME): selector.TextSelector(),
+                _req(m, MON_ENTITY): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor")
                 ),
-                req(MON_TYPE, "cumulative"): choice("consumption_type", ["cumulative", "instant"]),
-                req(MON_RULE, "threshold"): choice("consumption_rule", ["threshold", "continuous", "habit"]),
-                opt(MON_THRESHOLD): number(min=0, step="any"),
-                opt(MON_WINDOW, 60): number(min=1, max=1440, step=1, unit_of_measurement="min"),
-                opt(MON_HOURS, 6): number(min=0.5, max=72, step="any", unit_of_measurement="h"),
-                opt(MON_DAYS, 7): number(min=3, max=60, step=1),
-                opt(MON_FACTOR, 2): number(min=1, step="any"),
-                opt(MON_COOLDOWN, 60): number(min=1, max=10080, step=1, unit_of_measurement="min"),
-                req(MON_TARGET, ACTION_SEND_TO_ALL): choice(
+                _req(m, MON_TYPE, "cumulative"): _choice(
+                    self.hass, "consumption_type", ["cumulative", "instant"]
+                ),
+                _req(m, MON_RULE, "threshold"): _choice(
+                    self.hass, "consumption_rule", list(RULE_FIELDS)
+                ),
+                _req(m, MON_COOLDOWN, 60): _number(
+                    min=1, max=10080, step=1, unit_of_measurement="min"
+                ),
+                _req(m, MON_TARGET, ACTION_SEND_TO_ALL): _choice(
+                    self.hass,
                     "target",
                     [
                         ACTION_SEND_TO_ALL,
@@ -575,31 +596,66 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
             }
         )
 
-    @staticmethod
-    def _monitor_errors(user_input: dict[str, Any] | None) -> dict[str, str]:
-        if (
-            user_input is not None
-            and user_input.get(MON_RULE) == "threshold"
-            and not user_input.get(MON_THRESHOLD)
-        ):
-            return {MON_THRESHOLD: "threshold_required"}
-        return {}
+    async def _common_step(
+        self, step_id: str, user_input: dict[str, Any] | None
+    ) -> FlowResult:
+        if user_input is not None:
+            self._draft = user_input
+            return await getattr(self, f"async_step_monitor_{user_input[MON_RULE]}")()
+        return self.async_show_form(
+            step_id=step_id, data_schema=self._common_schema(self._source)
+        )
+
+    async def _rule_step(
+        self, rule: str, user_input: dict[str, Any] | None
+    ) -> FlowResult:
+        """Second screen: only the fields the chosen rule uses; then save."""
+        if user_input is not None:
+            monitor = {**self._draft, **user_input}
+            monitors = list(self._options.get(CONF_CONSUMPTION_MONITORS, []))
+            idx = self._selected_item_index
+            if idx is None:
+                monitor[MON_ID] = uuid.uuid4().hex[:8]
+                monitors.append(monitor)
+            else:
+                monitor[MON_ID] = monitors[idx][MON_ID]
+                monitors[idx] = monitor
+            self._options[CONF_CONSUMPTION_MONITORS] = monitors
+            self._selected_item_index = None
+            return await self.async_step_init()
+
+        source = self._source if self._source.get(MON_RULE) == rule else {}
+        schema = vol.Schema(
+            {
+                _req(source, key, default): _number(**kwargs)
+                for key, default, kwargs in RULE_FIELDS[rule]
+            }
+        )
+        return self.async_show_form(step_id=f"monitor_{rule}", data_schema=schema)
+
+    async def async_step_monitor_threshold(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        return await self._rule_step("threshold", user_input)
+
+    async def async_step_monitor_continuous(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        return await self._rule_step("continuous", user_input)
+
+    async def async_step_monitor_habit(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        return await self._rule_step("habit", user_input)
 
     async def async_step_add_monitor(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Add a consumption monitor."""
-        errors = self._monitor_errors(user_input)
-        if user_input is not None and not errors:
-            monitors = list(self._options.get(CONF_CONSUMPTION_MONITORS, []))
-            monitors.append({**user_input, MON_ID: uuid.uuid4().hex[:8]})
-            self._options[CONF_CONSUMPTION_MONITORS] = monitors
-            return await self.async_step_init()
-        return self.async_show_form(
-            step_id="add_monitor",
-            data_schema=self._monitor_schema(user_input or {}),
-            errors=errors,
-        )
+        if user_input is None:
+            self._selected_item_index = None
+            self._source = {}
+        return await self._common_step("add_monitor", user_input)
 
     async def async_step_manage_monitors(
         self, user_input: dict[str, Any] | None = None
@@ -650,18 +706,9 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
         monitors = self._options.get(CONF_CONSUMPTION_MONITORS, [])
         if idx is None or idx >= len(monitors):
             return await self.async_step_init()
-
-        errors = self._monitor_errors(user_input)
-        if user_input is not None and not errors:
-            monitors[idx] = {**user_input, MON_ID: monitors[idx][MON_ID]}
-            self._options[CONF_CONSUMPTION_MONITORS] = monitors
-            self._selected_item_index = None
-            return await self.async_step_init()
-        return self.async_show_form(
-            step_id="edit_monitor",
-            data_schema=self._monitor_schema(user_input or monitors[idx]),
-            errors=errors,
-        )
+        if user_input is None:
+            self._source = monitors[idx]
+        return await self._common_step("edit_monitor", user_input)
 
     async def async_step_finish(
         self, user_input: dict[str, Any] | None = None
