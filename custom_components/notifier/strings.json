@@ -247,13 +247,17 @@
       }
     },
     "consumption_type": {
-      "cumulative": "Cumulative meter (kWh, m³, L)",
-      "instant": "Instant value (W, L/min)"
+      "options": {
+        "cumulative": "Cumulative meter (kWh, m³, L)",
+        "instant": "Instant value (W, L/min)"
+      }
     },
     "consumption_rule": {
-      "threshold": "Threshold over a time window",
-      "continuous": "Continuous flow (possible leak)",
-      "habit": "Unusual compared to usual hours"
+      "options": {
+        "threshold": "Threshold over a time window",
+        "continuous": "Continuous flow (possible leak)",
+        "habit": "Unusual compared to usual hours"
+      }
     }
   }
 }

@@ -247,13 +247,17 @@
       }
     },
     "consumption_type": {
-      "cumulative": "Compteur cumulatif (kWh, m³, L)",
-      "instant": "Valeur instantanée (W, L/min)"
+      "options": {
+        "cumulative": "Compteur cumulatif (kWh, m³, L)",
+        "instant": "Valeur instantanée (W, L/min)"
+      }
     },
     "consumption_rule": {
-      "threshold": "Seuil sur une fenêtre de temps",
-      "continuous": "Débit continu (fuite possible)",
-      "habit": "Inhabituel par rapport aux heures habituelles"
+      "options": {
+        "threshold": "Seuil sur une fenêtre de temps",
+        "continuous": "Débit continu (fuite possible)",
+        "habit": "Inhabituel par rapport aux heures habituelles"
+      }
     }
   }
 }
