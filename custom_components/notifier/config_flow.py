@@ -111,6 +111,8 @@ async def _energy_sources(hass: HomeAssistant) -> list[selector.SelectOptionDict
     for src in prefs.get("energy_sources", []):
         kind = src.get("type")
         if kind == "grid":
+            # Stored flat (stat_energy_from); older/newer layouts use a flow_from list.
+            found.append((src.get("stat_energy_from"), "grid"))
             found += [(f.get("stat_energy_from"), "grid") for f in src.get("flow_from", [])]
         elif kind in ("gas", "water"):
             found.append((src.get("stat_energy_from"), kind))
