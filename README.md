@@ -5,8 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Donate-orange.svg?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/slide598b)
 
-> Smart notifications for **Home Assistant** (presence-aware targeting, staging, auto-discard), 100% configurable from the UI, ready for **HACS**.  
-> *Des notifications intelligentes pour **Home Assistant** (ciblage selon la présence, mise en attente, suppression automatique), 100 % configurables depuis l'interface, prêtes pour **HACS**.*
+> Smart notifications for **Home Assistant** (presence-aware targeting, staging, auto-discard) and abnormal water / electricity consumption alerts, 100% configurable from the UI, ready for **HACS**.  
+> *Des notifications intelligentes pour **Home Assistant** (ciblage selon la présence, mise en attente, suppression automatique) et des alertes de consommation anormale d'eau / d'électricité, 100 % configurables depuis l'interface, prêtes pour **HACS**.*
 
 > 💡 **Credits / Crédits:** inspired by the work of [jlpouffier](https://github.com/jlpouffier) on GitHub and his YouTube channel [@HorizonDomotique](https://www.youtube.com/@HorizonDomotique).
 
@@ -34,7 +34,7 @@ Notifier is fully backwards-compatible with the former AppDaemon `notifier.py` a
 
 ## ✨ Features
 
-- ⚙️ **100% UI configurable, no YAML:** persons, presence sensor, proximity threshold and always-home devices are managed in **Settings → Devices & services**. Notification services are picked from a dropdown.
+- ⚙️ **100% UI configurable, no YAML:** persons, "Home occupied" sensor, proximity threshold, always-home devices and consumption monitors are managed in **Settings → Devices & services**. Notification services are picked from a dropdown.
 - 🔄 **Backwards-compatible:** listens to the `NOTIFIER` and `NOTIFIER_DISCARD` events and to `mobile_app_notification_action` clicks.
 - 🎯 **Smart targeting (`action`):**
   - `send_to_<name>`: send directly to that person's phone.
@@ -47,7 +47,7 @@ Notifier is fully backwards-compatible with the former AppDaemon `notifier.py` a
 - ⏱️ **Watchers (`until`):** automatically dismiss a notification once an entity reaches a state (light off, home occupied...).
 - 🔔 **Services:** `notifier.send` and `notifier.discard`, in addition to the events.
 - 🏠 **"Home occupied" sensor:** created automatically, on when a selected person is home.
-- 💧 **Consumption monitoring (optional):** alerts for abnormal water / electricity use (threshold, continuous flow, daily habit), see below.
+- 💧 **Consumption monitoring (optional):** alerts for abnormal water / electricity use (threshold, continuous flow, daily habit with "it was normal" / "close" buttons). Sources can be picked straight from the Energy dashboard, see below.
 
 ## 📦 Installation
 
@@ -130,7 +130,7 @@ Notifier est entièrement rétrocompatible avec l'ancienne app AppDaemon `notifi
 
 ## ✨ Fonctionnalités
 
-- ⚙️ **100 % configurable depuis l'interface, sans YAML :** personnes, capteur de présence, seuil de proximité et appareils toujours présents se gèrent dans **Paramètres → Appareils et services**. Les services de notification se choisissent dans une liste déroulante.
+- ⚙️ **100 % configurable depuis l'interface, sans YAML :** personnes, capteur « Maison occupée », seuil de proximité, appareils toujours présents et surveillances de consommation se gèrent dans **Paramètres → Appareils et services**. Les services de notification se choisissent dans une liste déroulante.
 - 🔄 **Rétrocompatible :** écoute les événements `NOTIFIER` et `NOTIFIER_DISCARD` ainsi que les clics `mobile_app_notification_action`.
 - 🎯 **Ciblage intelligent (`action`) :**
   - `send_to_<nom>` : envoi direct au téléphone de cette personne.
@@ -143,7 +143,7 @@ Notifier est entièrement rétrocompatible avec l'ancienne app AppDaemon `notifi
 - ⏱️ **Surveillance (`until`) :** supprime automatiquement la notification quand une entité atteint un état (lumière éteinte, maison occupée...).
 - 🔔 **Services :** `notifier.send` et `notifier.discard`, en plus des événements.
 - 🏠 **Capteur « Maison occupée » :** créé automatiquement, actif quand une personne sélectionnée est à la maison.
-- 💧 **Surveillance de la consommation (optionnelle) :** alertes de consommation anormale d'eau / d'électricité (seuil, débit continu, habitude quotidienne), voir plus bas.
+- 💧 **Surveillance de la consommation (optionnelle) :** alertes de consommation anormale d'eau / d'électricité (seuil, débit continu, habitude quotidienne avec boutons « C'était normal » / « Fermer »). Les sources se choisissent directement dans le tableau de bord Énergie, voir plus bas.
 
 ## 📦 Installation
 
