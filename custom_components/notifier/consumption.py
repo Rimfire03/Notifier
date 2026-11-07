@@ -49,13 +49,13 @@ SAVE_DELAY = 300
 MESSAGES = {
     "fr": {
         "title": "Alerte consommation",
-        "threshold": "Consommation anormale sur « {name} » : {value:.2f} {unit} en {window} min (seuil {limit:g} {unit}).",
+        "threshold": "Consommation anormale sur « {name} » : {value:.2f} {unit} en {window:g} min (seuil {limit:g} {unit}).",
         "continuous": "Consommation continue sur « {name} » depuis {value:.1f} h (limite {limit:g} h) : fuite possible.",
         "habit": "Consommation inhabituelle sur « {name} » : {value:.2f} {unit} cette heure (alerte au-delà de {limit:.2f} {unit}).",
     },
     "en": {
         "title": "Consumption alert",
-        "threshold": "Abnormal consumption on \"{name}\": {value:.2f} {unit} in {window} min (limit {limit:g} {unit}).",
+        "threshold": "Abnormal consumption on \"{name}\": {value:.2f} {unit} in {window:g} min (limit {limit:g} {unit}).",
         "continuous": "Continuous consumption on \"{name}\" for {value:.1f} h (limit {limit:g} h): possible leak.",
         "habit": "Unusual consumption on \"{name}\": {value:.2f} {unit} this hour (alert above {limit:.2f} {unit}).",
     },
@@ -83,11 +83,11 @@ class ConsumptionMonitor:
         self.cumulative: bool = cfg.get(MON_TYPE, "cumulative") != "instant"
         self.rule: str = cfg.get(MON_RULE, "threshold")
         self.threshold = float(cfg.get(MON_THRESHOLD) or 0)
-        self.window = int(cfg.get(MON_WINDOW) or 60)
+        self.window = float(cfg.get(MON_WINDOW) or 60)
         self.hours = float(cfg.get(MON_HOURS) or 6)
         self.days = int(cfg.get(MON_DAYS) or 7)
         self.factor = float(cfg.get(MON_FACTOR) or 2)
-        self.cooldown = int(cfg.get(MON_COOLDOWN) or 60)
+        self.cooldown = float(cfg.get(MON_COOLDOWN) or 60)
         self.target: str = cfg.get(MON_TARGET) or "send_to_all"
 
         self.unit = ""

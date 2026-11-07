@@ -120,7 +120,7 @@
           "entity": "Water / electricity sensor",
           "type": "Sensor type",
           "rule": "Detection rule",
-          "cooldown_minutes": "Minutes between two alerts",
+          "cooldown_minutes": "Delay between two alerts",
           "target": "Who is notified"
         }
       },
@@ -131,7 +131,7 @@
           "entity": "Water / electricity sensor",
           "type": "Sensor type",
           "rule": "Detection rule",
-          "cooldown_minutes": "Minutes between two alerts",
+          "cooldown_minutes": "Delay between two alerts",
           "target": "Who is notified"
         }
       },
@@ -151,13 +151,13 @@
         "title": "Threshold rule",
         "data": {
           "threshold": "Threshold (in the sensor's unit, per window)",
-          "window_minutes": "Window in minutes"
+          "window_minutes": "Time window"
         }
       },
       "monitor_continuous": {
         "title": "Continuous flow rule",
         "data": {
-          "continuous_hours": "Continuous hours before alert"
+          "continuous_hours": "Continuous duration before alert"
         }
       },
       "monitor_habit": {

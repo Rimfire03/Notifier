@@ -109,13 +109,18 @@ def _notify_selector(hass: HomeAssistant) -> selector.SelectSelector:
     )
 
 
-RULE_FIELDS: dict[str, list[tuple[str, Any, dict[str, Any]]]] = {
+# Durations are entered as hours/minutes/seconds. Stored value = minutes / divisor
+# (so existing numeric options keep working).
+DURATION_KEYS = {MON_WINDOW: 1, MON_HOURS: 60, MON_COOLDOWN: 1}
+
+# (key, default, number-selector kwargs); kwargs None = duration field, default in minutes.
+RULE_FIELDS: dict[str, list[tuple[str, Any, dict[str, Any] | None]]] = {
     "threshold": [
         (MON_THRESHOLD, None, {"min": 0, "step": "any"}),
-        (MON_WINDOW, 60, {"min": 1, "max": 1440, "step": 1, "unit_of_measurement": "min"}),
+        (MON_WINDOW, 60, None),
     ],
     "continuous": [
-        (MON_HOURS, 6, {"min": 0.5, "max": 72, "step": "any", "unit_of_measurement": "h"}),
+        (MON_HOURS, 360, None),
     ],
     "habit": [
         (MON_DAYS, 7, {"min": 3, "max": 60, "step": 1}),
@@ -128,6 +133,28 @@ def _req(m: dict[str, Any], key: str, default: Any = None) -> vol.Required:
     """Required key prefilled from m, else from default (no default when both are None)."""
     value = m.get(key, default)
     return vol.Required(key, default=value) if value is not None else vol.Required(key)
+
+
+def _duration_field(m: dict[str, Any], key: str, default_minutes: float) -> tuple[vol.Required, Any]:
+    stored = m.get(key)
+    minutes = stored * DURATION_KEYS[key] if stored is not None else default_minutes
+    total = int(round(minutes * 60))
+    default = {"hours": total // 3600, "minutes": total % 3600 // 60, "seconds": total % 60}
+    return (
+        vol.Required(key, default=default),
+        selector.DurationSelector(selector.DurationSelectorConfig(enable_day=False)),
+    )
+
+
+def _store_durations(user_input: dict[str, Any]) -> dict[str, Any]:
+    """Turn duration dicts from the form into the stored numbers."""
+    out = dict(user_input)
+    for key, divisor in DURATION_KEYS.items():
+        d = out.get(key)
+        if isinstance(d, dict):
+            minutes = d.get("hours", 0) * 60 + d.get("minutes", 0) + d.get("seconds", 0) / 60
+            out[key] = minutes / divisor
+    return out
 
 
 def _number(**kwargs: Any) -> selector.NumberSelector:
@@ -567,6 +594,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
 
     def _common_schema(self, m: dict[str, Any]) -> vol.Schema:
         """Fields shared by every rule."""
+        cooldown_key, cooldown_selector = _duration_field(m, MON_COOLDOWN, 60)
         return vol.Schema(
             {
                 _req(m, MON_NAME): selector.TextSelector(),
@@ -579,9 +607,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 _req(m, MON_RULE, "threshold"): _choice(
                     self.hass, "consumption_rule", list(RULE_FIELDS)
                 ),
-                _req(m, MON_COOLDOWN, 60): _number(
-                    min=1, max=10080, step=1, unit_of_measurement="min"
-                ),
+                cooldown_key: cooldown_selector,
                 _req(m, MON_TARGET, ACTION_SEND_TO_ALL): _choice(
                     self.hass,
                     "target",
@@ -600,7 +626,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
         self, step_id: str, user_input: dict[str, Any] | None
     ) -> FlowResult:
         if user_input is not None:
-            self._draft = user_input
+            self._draft = _store_durations(user_input)
             return await getattr(self, f"async_step_monitor_{user_input[MON_RULE]}")()
         return self.async_show_form(
             step_id=step_id, data_schema=self._common_schema(self._source)
@@ -611,7 +637,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
     ) -> FlowResult:
         """Second screen: only the fields the chosen rule uses; then save."""
         if user_input is not None:
-            monitor = {**self._draft, **user_input}
+            monitor = {**self._draft, **_store_durations(user_input)}
             monitors = list(self._options.get(CONF_CONSUMPTION_MONITORS, []))
             idx = self._selected_item_index
             if idx is None:
@@ -625,12 +651,14 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
             return await self.async_step_init()
 
         source = self._source if self._source.get(MON_RULE) == rule else {}
-        schema = vol.Schema(
-            {
-                _req(source, key, default): _number(**kwargs)
-                for key, default, kwargs in RULE_FIELDS[rule]
-            }
-        )
+        fields: dict[Any, Any] = {}
+        for key, default, kwargs in RULE_FIELDS[rule]:
+            if kwargs is None:
+                marker, sel = _duration_field(source, key, default)
+            else:
+                marker, sel = _req(source, key, default), _number(**kwargs)
+            fields[marker] = sel
+        schema = vol.Schema(fields)
         return self.async_show_form(step_id=f"monitor_{rule}", data_schema=schema)
 
     async def async_step_monitor_threshold(
