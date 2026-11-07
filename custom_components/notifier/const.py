@@ -8,6 +8,7 @@ CONF_HOME_OCCUPANCY_SENSOR = "home_occupancy_sensor"
 CONF_OCCUPIED_STATE = "occupied_state"
 CONF_PROXIMITY_THRESHOLD = "proximity_threshold"
 CONF_CREATE_OCCUPANCY_SENSOR = "create_occupancy_sensor"
+CONF_OCCUPANCY_PERSONS = "occupancy_persons"
 CONF_PERSONS = "persons"
 CONF_ALWAYS_HOME_DEVICES = "always_home_devices"
 

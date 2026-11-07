@@ -18,6 +18,7 @@ from .const import (
     CONF_DISTANCE_SENSOR,
     CONF_HOME_OCCUPANCY_SENSOR,
     CONF_NOTIFICATION_SERVICE,
+    CONF_OCCUPANCY_PERSONS,
     CONF_OCCUPIED_STATE,
     CONF_PERSON_ID,
     CONF_PERSON_NAME,
@@ -211,6 +212,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 self._options[CONF_HOME_OCCUPANCY_SENSOR] = user_input.get(
                     CONF_HOME_OCCUPANCY_SENSOR, ""
                 )
+                self._options[CONF_OCCUPANCY_PERSONS] = user_input.get(CONF_OCCUPANCY_PERSONS, [])
                 return await self.async_step_init()
 
         schema = vol.Schema(
@@ -225,6 +227,22 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                         "suggested_value": self._options.get(CONF_HOME_OCCUPANCY_SENSOR) or None
                     },
                 ): selector.EntitySelector(),
+                vol.Optional(
+                    CONF_OCCUPANCY_PERSONS,
+                    description={
+                        "suggested_value": self._options.get(CONF_OCCUPANCY_PERSONS) or []
+                    },
+                ): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=[
+                            p[CONF_PERSON_NAME]
+                            for p in self._options.get(CONF_PERSONS, [])
+                            if p.get(CONF_PERSON_NAME)
+                        ],
+                        multiple=True,
+                        mode=selector.SelectSelectorMode.DROPDOWN,
+                    )
+                ),
                 vol.Required(
                     CONF_OCCUPIED_STATE,
                     default=self._options.get(CONF_OCCUPIED_STATE, DEFAULT_OCCUPIED_STATE),

@@ -13,7 +13,9 @@ from homeassistant.helpers.event import async_track_state_change_event
 
 from .const import (
     CONF_CREATE_OCCUPANCY_SENSOR,
+    CONF_OCCUPANCY_PERSONS,
     CONF_PERSON_ID,
+    CONF_PERSON_NAME,
     CONF_PERSONS,
     DOMAIN,
     OCCUPANCY_SENSOR_UNIQUE_SUFFIX,
@@ -31,7 +33,13 @@ async def async_setup_entry(
         if entity_id := registry.async_get_entity_id("binary_sensor", DOMAIN, unique_id):
             registry.async_remove(entity_id)
         return
-    trackers = [p[CONF_PERSON_ID] for p in config.get(CONF_PERSONS, []) if p.get(CONF_PERSON_ID)]
+    # Empty selection = every configured person.
+    wanted = config.get(CONF_OCCUPANCY_PERSONS) or []
+    trackers = [
+        p[CONF_PERSON_ID]
+        for p in config.get(CONF_PERSONS, [])
+        if p.get(CONF_PERSON_ID) and (not wanted or p.get(CONF_PERSON_NAME) in wanted)
+    ]
     async_add_entities([HomeOccupiedSensor(unique_id, trackers)])
 
 
