@@ -20,7 +20,10 @@ jobs:
       - name: Calculate version from commit count
         id: versioning
         run: |
-          COMMIT_COUNT=$(git rev-list --count HEAD)
+          # The bot's own "set version" commit must not count, otherwise each push adds 2.
+          # OFFSET keeps numbering continuous with releases made before this rule (v0.35 -> v0.36).
+          OFFSET=16
+          COMMIT_COUNT=$(( $(git rev-list --count HEAD --invert-grep --grep='^chore: set version') + OFFSET ))
           X=$((COMMIT_COUNT / 100))
           YY=$(printf "%02d" $((COMMIT_COUNT % 100)))
           VERSION="v${X}.${YY}"
