@@ -258,6 +258,12 @@
         "continuous": "Débit continu (fuite possible)",
         "habit": "Inhabituel par rapport aux heures habituelles"
       }
+    },
+    "manage_action": {
+      "options": {
+        "edit": "Modifier",
+        "delete": "Supprimer"
+      }
     }
   }
 }

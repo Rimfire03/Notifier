@@ -258,6 +258,12 @@
         "continuous": "Continuous flow (possible leak)",
         "habit": "Unusual compared to usual hours"
       }
+    },
+    "manage_action": {
+      "options": {
+        "edit": "Edit",
+        "delete": "Delete"
+      }
     }
   }
 }

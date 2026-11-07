@@ -330,10 +330,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 ),
                 vol.Required("action", default="edit"): selector.SelectSelector(
                     selector.SelectSelectorConfig(
-                        options=[
-                            selector.SelectOptionDict(value="edit", label="Edit"),
-                            selector.SelectOptionDict(value="delete", label="Delete"),
-                        ]
+                        options=["edit", "delete"], translation_key="manage_action"
                     )
                 ),
             }
@@ -443,10 +440,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 ),
                 vol.Required("action", default="edit"): selector.SelectSelector(
                     selector.SelectSelectorConfig(
-                        options=[
-                            selector.SelectOptionDict(value="edit", label="Edit"),
-                            selector.SelectOptionDict(value="delete", label="Delete"),
-                        ]
+                        options=["edit", "delete"], translation_key="manage_action"
                     )
                 ),
             }
@@ -525,7 +519,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 opt(MON_THRESHOLD): number(min=0, step="any"),
                 opt(MON_WINDOW, 60): number(min=1, max=1440, step=1, unit_of_measurement="min"),
                 opt(MON_HOURS, 6): number(min=0.5, max=72, step="any", unit_of_measurement="h"),
-                opt(MON_DAYS, 7): number(min=3, max=60, step=1, unit_of_measurement="j"),
+                opt(MON_DAYS, 7): number(min=3, max=60, step=1),
                 opt(MON_FACTOR, 2): number(min=1, step="any"),
                 opt(MON_COOLDOWN, 60): number(min=1, max=10080, step=1, unit_of_measurement="min"),
                 req(MON_TARGET, ACTION_SEND_TO_ALL): choice(
@@ -601,10 +595,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 ),
                 vol.Required("action", default="edit"): selector.SelectSelector(
                     selector.SelectSelectorConfig(
-                        options=[
-                            selector.SelectOptionDict(value="edit", label="Edit"),
-                            selector.SelectOptionDict(value="delete", label="Delete"),
-                        ]
+                        options=["edit", "delete"], translation_key="manage_action"
                     )
                 ),
             }
