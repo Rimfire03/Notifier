@@ -120,7 +120,6 @@
           "entity": "Capteur d'eau / d'électricité",
           "type": "Type de capteur",
           "rule": "Règle de détection",
-          "cooldown_minutes": "Délai entre deux alertes",
           "target": "Qui est notifié"
         }
       },
@@ -131,7 +130,6 @@
           "entity": "Capteur d'eau / d'électricité",
           "type": "Type de capteur",
           "rule": "Règle de détection",
-          "cooldown_minutes": "Délai entre deux alertes",
           "target": "Qui est notifié"
         }
       },
@@ -151,21 +149,23 @@
         "title": "Règle seuil",
         "data": {
           "threshold": "Seuil (dans l'unité du capteur, par fenêtre)",
-          "window_minutes": "Fenêtre de temps"
+          "window_minutes": "Fenêtre de temps",
+          "cooldown_minutes": "Délai entre deux alertes"
         }
       },
       "monitor_continuous": {
         "title": "Règle débit continu",
         "data": {
-          "continuous_hours": "Durée continue avant alerte"
+          "continuous_hours": "Durée continue avant alerte",
+          "cooldown_minutes": "Délai entre deux alertes"
         }
       },
       "monitor_habit": {
         "title": "Règle habitude",
         "data": {
-          "habit_days": "Jours d'historique",
-          "habit_factor": "Alerte au-delà de N fois l'habituel"
-        }
+          "alert_time": "Heure d'envoi de l'alerte"
+        },
+        "description": "Une fois par jour, à cette heure, les dernières 24 h sont comparées aux 24 h des jours précédents."
       }
     }
   },

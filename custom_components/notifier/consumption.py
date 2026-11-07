@@ -33,6 +33,7 @@ from .const import (
     MON_RULE,
     MON_TARGET,
     MON_THRESHOLD,
+    MON_TIME,
     MON_TYPE,
     MON_WINDOW,
 )
@@ -43,6 +44,11 @@ _LOGGER = logging.getLogger(__name__)
 CONTINUOUS_GAP = 3600
 # Minimum distinct days of history before the habit rule may alert.
 HABIT_MIN_DAYS = 3
+HABIT_DAYS = 7
+HABIT_FACTOR = 1.5
+HABIT_DEFAULT_TIME = "08:00:00"
+# The daily check runs on the minute tick: allow a few minutes of slack, not a late alert after a restart.
+HABIT_GRACE_MINUTES = 10
 HOUR_FORMAT = "%Y-%m-%dT%H"
 SAVE_DELAY = 300
 
@@ -51,13 +57,13 @@ MESSAGES = {
         "title": "Alerte consommation",
         "threshold": "Consommation anormale sur « {name} » : {value:.2f} {unit} en {window:g} min (seuil {limit:g} {unit}).",
         "continuous": "Consommation continue sur « {name} » depuis {value:.1f} h (limite {limit:g} h) : fuite possible.",
-        "habit": "Consommation inhabituelle sur « {name} » : {value:.2f} {unit} cette heure (alerte au-delà de {limit:.2f} {unit}).",
+        "habit": "Consommation inhabituelle sur « {name} » : {value:.2f} {unit} sur les dernières 24 h (alerte au-delà de {limit:.2f} {unit}).",
     },
     "en": {
         "title": "Consumption alert",
         "threshold": "Abnormal consumption on \"{name}\": {value:.2f} {unit} in {window:g} min (limit {limit:g} {unit}).",
         "continuous": "Continuous consumption on \"{name}\" for {value:.1f} h (limit {limit:g} h): possible leak.",
-        "habit": "Unusual consumption on \"{name}\": {value:.2f} {unit} this hour (alert above {limit:.2f} {unit}).",
+        "habit": "Unusual consumption on \"{name}\": {value:.2f} {unit} over the last 24 h (alert above {limit:.2f} {unit}).",
     },
 }
 
@@ -85,8 +91,14 @@ class ConsumptionMonitor:
         self.threshold = float(cfg.get(MON_THRESHOLD) or 0)
         self.window = float(cfg.get(MON_WINDOW) or 60)
         self.hours = float(cfg.get(MON_HOURS) or 6)
-        self.days = int(cfg.get(MON_DAYS) or 7)
-        self.factor = float(cfg.get(MON_FACTOR) or 2)
+        # Habit rule: fixed history and sensitivity, the user only picks the alert time.
+        self.days = int(cfg.get(MON_DAYS) or HABIT_DAYS)
+        self.factor = float(cfg.get(MON_FACTOR) or HABIT_FACTOR)
+        hour, minute, *_ = (cfg.get(MON_TIME) or HABIT_DEFAULT_TIME).split(":")
+        self.alert_hm = (int(hour), int(minute))
+        self._habit_day: str | None = None
+        self._habit_verdict: tuple[bool, float, float] = (False, 0.0, 0.0)
+        self._fire = False
         self.cooldown = float(cfg.get(MON_COOLDOWN) or 60)
         self.target: str = cfg.get(MON_TARGET) or "send_to_all"
 
@@ -106,9 +118,9 @@ class ConsumptionMonitor:
         self.listeners.append(listener)
         return lambda: self.listeners.remove(listener)
 
-    def _hour_key(self, now: float, days_back: int = 0) -> str:
+    def _hour_key(self, now: float, days_back: int = 0, hours_back: int = 0) -> str:
         local = dt_util.as_local(dt_util.utc_from_timestamp(now))
-        return (local - timedelta(days=days_back)).strftime(HOUR_FORMAT)
+        return (local - timedelta(days=days_back, hours=hours_back)).strftime(HOUR_FORMAT)
 
     @staticmethod
     def _bucket_value(bucket: list[float] | None, cumulative: bool) -> float:
@@ -143,7 +155,7 @@ class ConsumptionMonitor:
 
         key = self._hour_key(now)
         if key not in self.buckets:
-            cutoff = self._hour_key(now, self.days + 1)
+            cutoff = self._hour_key(now, self.days + 2)  # +1 day for the 24 h window itself
             self.buckets = {k: b for k, b in self.buckets.items() if k >= cutoff}
             self.buckets[key] = [0.0, 0]
         self.buckets[key][0] += x
@@ -173,17 +185,55 @@ class ConsumptionMonitor:
         total = sum(values) if self.cumulative else sum(values) / len(values)
         return total > self.threshold, total, self.threshold
 
+    def _day_total(self, now: float, days_back: int) -> float:
+        """Consumption over the 24 h ending at `now`, shifted back by days_back days.
+
+        Cumulative: sum of the hours. Instant: average of the hours.
+        Hours without events carry no bucket and count as zero.
+        """
+        total = sum(
+            self._bucket_value(
+                self.buckets.get(self._hour_key(now, days_back, h)), self.cumulative
+            )
+            for h in range(24)
+        )
+        return total if self.cumulative else total / 24
+
     def _evaluate_habit(self, now: float) -> tuple[bool, float, float]:
-        current = self._bucket_value(self.buckets.get(self._hour_key(now)), self.cumulative)
-        if len({k[:10] for k in self.buckets}) < HABIT_MIN_DAYS:
-            return False, current, 0.0
-        # Hours without events carry no bucket: they count as zero consumption.
-        past = [
-            self._bucket_value(self.buckets.get(self._hour_key(now, d)), self.cumulative)
-            for d in range(1, self.days + 1)
-        ]
-        limit = sum(past) / len(past) * self.factor
-        return limit > 0 and current > limit, current, limit
+        """Daily check at the chosen time: last 24 h against the previous days' 24 h."""
+        local = dt_util.as_local(dt_util.utc_from_timestamp(now))
+        today = local.date().isoformat()
+        hour, minute = self.alert_hm
+        due = local.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        if (
+            self._habit_day != today
+            and due <= local < due + timedelta(minutes=HABIT_GRACE_MINUTES)
+        ):
+            self._habit_day = today
+            current = self._day_total(now, 0)
+            # Only compare with days fully covered by recorded history.
+            first = min(self.buckets, default=None)
+            days = [
+                d
+                for d in range(1, self.days + 1)
+                if first is not None and self._hour_key(now, d, 23) >= first
+            ]
+            if len(days) < HABIT_MIN_DAYS:
+                self._habit_verdict = (False, current, 0.0)
+            else:
+                past = [self._day_total(now, d) for d in days]
+                limit = sum(past) / len(past) * self.factor
+                abnormal = limit > 0 and current > limit
+                self._habit_verdict = (abnormal, current, limit)
+                self._fire = abnormal
+        return self._habit_verdict
+
+    def should_notify(self, now: float, changed: bool) -> bool:
+        """Whether an alert message must be sent now (the sensor is already abnormal)."""
+        if self.rule == "habit":
+            fire, self._fire = self._fire, False  # once per daily check
+            return fire
+        return changed or now - self.last_notified >= self.cooldown * 60
 
 
 class ConsumptionManager:
@@ -257,7 +307,7 @@ class ConsumptionManager:
         if changed:
             for listener in list(m.listeners):
                 listener()
-        if abnormal and (changed or now - m.last_notified >= m.cooldown * 60):
+        if abnormal and m.should_notify(now, changed):
             m.last_notified = now
             self.hass.async_create_task(self._notify(m, value, limit))
 

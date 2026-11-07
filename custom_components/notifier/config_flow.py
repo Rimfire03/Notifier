@@ -20,15 +20,14 @@ from .const import (
     CONF_ALWAYS_HOME_DEVICES,
     CONF_CONSUMPTION_MONITORS,
     MON_COOLDOWN,
-    MON_DAYS,
     MON_ENTITY,
-    MON_FACTOR,
     MON_HOURS,
     MON_ID,
     MON_NAME,
     MON_RULE,
     MON_TARGET,
     MON_THRESHOLD,
+    MON_TIME,
     MON_TYPE,
     MON_WINDOW,
     CONF_DEVICE_NAME,
@@ -113,18 +112,21 @@ def _notify_selector(hass: HomeAssistant) -> selector.SelectSelector:
 # (so existing numeric options keep working).
 DURATION_KEYS = {MON_WINDOW: 1, MON_HOURS: 60, MON_COOLDOWN: 1}
 
-# (key, default, number-selector kwargs); kwargs None = duration field, default in minutes.
-RULE_FIELDS: dict[str, list[tuple[str, Any, dict[str, Any] | None]]] = {
+# (key, default, spec): spec dict = number selector kwargs, None = duration (default in
+# minutes), "time" = time of day.
+RULE_FIELDS: dict[str, list[tuple[str, Any, dict[str, Any] | str | None]]] = {
     "threshold": [
         (MON_THRESHOLD, None, {"min": 0, "step": "any"}),
         (MON_WINDOW, 60, None),
+        (MON_COOLDOWN, 60, None),
     ],
     "continuous": [
         (MON_HOURS, 360, None),
+        (MON_COOLDOWN, 60, None),
     ],
+    # Checked once a day over 24 h: history length and sensitivity are fixed in consumption.py.
     "habit": [
-        (MON_DAYS, 7, {"min": 3, "max": 60, "step": 1}),
-        (MON_FACTOR, 2, {"min": 1, "step": "any"}),
+        (MON_TIME, "08:00:00", "time"),
     ],
 }
 
@@ -594,7 +596,6 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
 
     def _common_schema(self, m: dict[str, Any]) -> vol.Schema:
         """Fields shared by every rule."""
-        cooldown_key, cooldown_selector = _duration_field(m, MON_COOLDOWN, 60)
         return vol.Schema(
             {
                 _req(m, MON_NAME): selector.TextSelector(),
@@ -607,7 +608,6 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 _req(m, MON_RULE, "threshold"): _choice(
                     self.hass, "consumption_rule", list(RULE_FIELDS)
                 ),
-                cooldown_key: cooldown_selector,
                 _req(m, MON_TARGET, ACTION_SEND_TO_ALL): _choice(
                     self.hass,
                     "target",
@@ -655,6 +655,8 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
         for key, default, kwargs in RULE_FIELDS[rule]:
             if kwargs is None:
                 marker, sel = _duration_field(source, key, default)
+            elif kwargs == "time":
+                marker, sel = _req(source, key, default), selector.TimeSelector()
             else:
                 marker, sel = _req(source, key, default), _number(**kwargs)
             fields[marker] = sel

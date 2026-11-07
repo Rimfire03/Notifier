@@ -38,6 +38,7 @@ MON_WINDOW = "window_minutes"
 MON_HOURS = "continuous_hours"
 MON_DAYS = "habit_days"
 MON_FACTOR = "habit_factor"
+MON_TIME = "alert_time"
 MON_COOLDOWN = "cooldown_minutes"
 MON_TARGET = "target"
 

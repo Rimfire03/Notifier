@@ -111,7 +111,7 @@ In **Configure → Add a consumption monitor**, pick a water or electricity sens
 |------|-----------|
 | Threshold | consumption over the window exceeds the threshold (cumulative: increase; instant: average) |
 | Continuous | the meter keeps moving for N hours without a pause of 1 h or more (possible leak) |
-| Habit | the current hour exceeds N times the average of the same hour over the last days (needs 3 days of history) |
+| Habit | once a day, at the time you choose, the last 24 h exceed 1.5 times the average of the same 24 h over the previous 7 days (needs 3 days of history) |
 
 ## 🏷️ Releases
 
@@ -172,7 +172,7 @@ Dans **Configurer → Ajouter une surveillance de consommation**, choisissez un 
 |-------|-------------|
 | Seuil | la consommation sur la fenêtre dépasse le seuil (cumulatif : augmentation ; instantané : moyenne) |
 | Continu | le compteur bouge sans pause d'au moins 1 h pendant N heures (fuite possible) |
-| Habitude | l'heure en cours dépasse N fois la moyenne de la même heure des derniers jours (3 jours d'historique requis) |
+| Habitude | une fois par jour, à l'heure choisie, les dernières 24 h dépassent 1,5 fois la moyenne des mêmes 24 h des 7 jours précédents (3 jours d'historique requis) |
 
 ## 🏷️ Versions
 
