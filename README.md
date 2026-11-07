@@ -122,10 +122,6 @@ Each monitor creates a problem `binary_sensor` (named after the monitor) that yo
 
 The habit alert carries two buttons: **It was normal** (turns the sensor off and fires the `notifier_consumption_normal` event with `name` and `entity_id`) and **Close**. Both dismiss the notification on every device. Buttons need a phone using the Companion app.
 
-## 🏷️ Releases
-
-Versions are automatic (`x.yy`, from the commit count, +1 per push; the bot's own "set version" commit is not counted): each push to `main` publishes a GitHub release and updates `manifest.json`. HACS offers it as an update.
-
 ---
 
 # 🇫🇷 Documentation en Français
@@ -191,10 +187,6 @@ Chaque surveillance crée un `binary_sensor` de type problème (du nom de la sur
 | Habitude | heure d'envoi, jours d'historique (7 par défaut), N (1,5 par défaut) | une fois par jour, à l'heure choisie, les dernières 24 h dépassent N fois la moyenne des mêmes 24 h des jours précédents (3 jours d'historique minimum, enregistrés par l'intégration elle-même) |
 
 L'alerte « habitude » porte deux boutons : **C'était normal** (éteint le capteur et déclenche l'événement `notifier_consumption_normal` avec `name` et `entity_id`) et **Fermer**. Les deux suppriment la notification sur tous les appareils. Les boutons nécessitent un téléphone avec l'app Companion.
-
-## 🏷️ Versions
-
-Les versions sont automatiques (`x.yy`, d'après le nombre de commits, +1 par push ; le commit « set version » du bot n'est pas compté) : chaque push sur `main` publie une release GitHub et met à jour `manifest.json`. HACS la propose comme mise à jour.
 
 ---
 
