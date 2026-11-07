@@ -46,6 +46,8 @@ Notifier is fully backwards-compatible with the former AppDaemon `notifier.py` a
 - 🏷️ **Tag & discard:** clicking an action button dismisses the notification on every device.
 - ⏱️ **Watchers (`until`):** automatically dismiss a notification once an entity reaches a state (light off, home occupied...).
 - 🔔 **Services:** `notifier.send` and `notifier.discard`, in addition to the events.
+- 🏠 **"Home occupied" sensor:** created automatically, on when a selected person is home.
+- 💧 **Consumption monitoring (optional):** alerts for abnormal water / electricity use (threshold, continuous flow, daily habit), see below.
 
 ## 📦 Installation
 
@@ -105,17 +107,24 @@ Supported fields: `action`, `title`, `message`, `tag`, `timeout`, `image_url`, `
 
 ### Consumption monitoring (optional)
 
-In **Configure → Add a consumption monitor**, pick a water or electricity sensor (cumulative meter or instant value), a rule and who to notify. Nothing changes if you add none. Each monitor creates a problem `binary_sensor` and sends an alert through the usual targets (`send_to_all`, `send_to_present`...), then waits for its cooldown before repeating.
+Nothing changes if you add no monitor. In **Configure → Add a consumption monitor**:
 
-| Rule | Alert when |
-|------|-----------|
-| Threshold | consumption over the window exceeds the threshold (cumulative: increase; instant: average) |
-| Continuous | the meter keeps moving for N hours without a pause of 1 h or more (possible leak) |
-| Habit | once a day, at the time you choose, the last 24 h exceed N times (default 1.5) the average of the same 24 h over the previous days (default 7, at least 3 days of history). The alert has two buttons: "It was normal" (clears the sensor, fires the `notifier_consumption_normal` event) and "Close" |
+1. **First screen:** name, water / electricity sensor, sensor type (cumulative meter such as kWh / m³ / L, or instant value such as W / L/min), detection rule, and who is notified (`send_to_all`, `send_to_present`...).
+2. **Second screen:** only the fields of the chosen rule (table below). Durations are entered in hours / minutes.
+
+Each monitor creates a problem `binary_sensor` (named after the monitor) that you can also use in your own automations. Edit or delete monitors with **Configure → Edit / Delete a consumption monitor**.
+
+| Rule | Fields | Alert when |
+|------|--------|-----------|
+| Threshold | threshold, time window, delay between alerts | consumption over the window exceeds the threshold (cumulative: increase; instant: average). Repeats after the delay while it lasts |
+| Continuous | duration, delay between alerts | the meter keeps moving for the whole duration without a pause of 1 h or more (possible leak) |
+| Habit | alert time, days of history (default 7), N (default 1.5) | once a day, at the alert time, the last 24 h exceed N times the average of the same 24 h over the previous days (at least 3 days of history, recorded by the integration itself) |
+
+The habit alert carries two buttons: **It was normal** (turns the sensor off and fires the `notifier_consumption_normal` event with `name` and `entity_id`) and **Close**. Both dismiss the notification on every device. Buttons need a phone using the Companion app.
 
 ## 🏷️ Releases
 
-Versions are automatic (`x.yy`, from the commit count): each push to `main` publishes a GitHub release and updates `manifest.json`. HACS offers it as an update.
+Versions are automatic (`x.yy`, from the commit count, +1 per push; the bot's own "set version" commit is not counted): each push to `main` publishes a GitHub release and updates `manifest.json`. HACS offers it as an update.
 
 ---
 
@@ -137,6 +146,8 @@ Notifier est entièrement rétrocompatible avec l'ancienne app AppDaemon `notifi
 - 🏷️ **Tag & suppression :** cliquer sur un bouton d'action supprime la notification sur tous les appareils.
 - ⏱️ **Surveillance (`until`) :** supprime automatiquement la notification quand une entité atteint un état (lumière éteinte, maison occupée...).
 - 🔔 **Services :** `notifier.send` et `notifier.discard`, en plus des événements.
+- 🏠 **Capteur « Maison occupée » :** créé automatiquement, actif quand une personne sélectionnée est à la maison.
+- 💧 **Surveillance de la consommation (optionnelle) :** alertes de consommation anormale d'eau / d'électricité (seuil, débit continu, habitude quotidienne), voir plus bas.
 
 ## 📦 Installation
 
@@ -166,17 +177,24 @@ Mêmes exemples que dans la section anglaise ci-dessus (événement `NOTIFIER` o
 
 ### Surveillance de la consommation (optionnelle)
 
-Dans **Configurer → Ajouter une surveillance de consommation**, choisissez un capteur d'eau ou d'électricité (compteur cumulatif ou valeur instantanée), une règle et qui notifier. Rien ne change si vous n'en ajoutez aucune. Chaque surveillance crée un `binary_sensor` de type problème et envoie l'alerte par les cibles habituelles (`send_to_all`, `send_to_present`...), puis attend son délai avant de répéter.
+Rien ne change si vous n'ajoutez aucune surveillance. Dans **Configurer → Ajouter une surveillance de consommation** :
 
-| Règle | Alerte quand |
-|-------|-------------|
-| Seuil | la consommation sur la fenêtre dépasse le seuil (cumulatif : augmentation ; instantané : moyenne) |
-| Continu | le compteur bouge sans pause d'au moins 1 h pendant N heures (fuite possible) |
-| Habitude | une fois par jour, à l'heure choisie, les dernières 24 h dépassent N fois (1,5 par défaut) la moyenne des mêmes 24 h des jours précédents (7 par défaut, 3 jours d'historique minimum). L'alerte a deux boutons : « C'était normal » (éteint le capteur, déclenche l'événement `notifier_consumption_normal`) et « Fermer » |
+1. **Premier écran :** nom, capteur d'eau / d'électricité, type de capteur (compteur cumulatif en kWh / m³ / L, ou valeur instantanée en W / L/min), règle de détection et qui est notifié (`send_to_all`, `send_to_present`...).
+2. **Second écran :** uniquement les champs de la règle choisie (tableau ci-dessous). Les durées se saisissent en heures / minutes.
+
+Chaque surveillance crée un `binary_sensor` de type problème (du nom de la surveillance), utilisable aussi dans vos automatisations. Modifiez ou supprimez les surveillances via **Configurer → Modifier / Supprimer une surveillance de consommation**.
+
+| Règle | Champs | Alerte quand |
+|-------|--------|-------------|
+| Seuil | seuil, fenêtre de temps, délai entre deux alertes | la consommation sur la fenêtre dépasse le seuil (cumulatif : augmentation ; instantané : moyenne). Se répète après le délai tant que ça dure |
+| Continu | durée, délai entre deux alertes | le compteur bouge sans pause d'au moins 1 h pendant toute la durée (fuite possible) |
+| Habitude | heure d'envoi, jours d'historique (7 par défaut), N (1,5 par défaut) | une fois par jour, à l'heure choisie, les dernières 24 h dépassent N fois la moyenne des mêmes 24 h des jours précédents (3 jours d'historique minimum, enregistrés par l'intégration elle-même) |
+
+L'alerte « habitude » porte deux boutons : **C'était normal** (éteint le capteur et déclenche l'événement `notifier_consumption_normal` avec `name` et `entity_id`) et **Fermer**. Les deux suppriment la notification sur tous les appareils. Les boutons nécessitent un téléphone avec l'app Companion.
 
 ## 🏷️ Versions
 
-Les versions sont automatiques (`x.yy`, d'après le nombre de commits) : chaque push sur `main` publie une release GitHub et met à jour `manifest.json`. HACS la propose comme mise à jour.
+Les versions sont automatiques (`x.yy`, d'après le nombre de commits, +1 par push ; le commit « set version » du bot n'est pas compté) : chaque push sur `main` publie une release GitHub et met à jour `manifest.json`. HACS la propose comme mise à jour.
 
 ---
 
