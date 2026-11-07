@@ -3,13 +3,10 @@
     "step": {
       "user": {
         "title": "Configuration de Notifier",
-        "description": "Choisissez comment détecter l'occupation de la maison, et le seuil de proximité.",
+        "description": "Le capteur « Maison occupée » est créé automatiquement. Choisissez son nom et le seuil de proximité.",
         "data": {
-          "create_occupancy_sensor": "Créer le capteur « Maison occupée » (actif quand quelqu'un est présent)",
-          "home_occupancy_sensor": "Ou utiliser un capteur d'occupation existant",
-          "occupied_state": "État quand la maison est occupée (ex: on, Occupée, Home)",
-          "proximity_threshold": "Seuil de proximité (mètres)",
-          "occupancy_sensor_name": "Nom du capteur intégré « Maison occupée »"
+          "occupancy_sensor_name": "Nom du capteur « Maison occupée »",
+          "proximity_threshold": "Seuil de proximité (mètres)"
         }
       },
       "menu": {
@@ -42,9 +39,6 @@
     },
     "abort": {
       "single_instance_allowed": "Une seule instance de Notifier est autorisée."
-    },
-    "error": {
-      "occupancy_required": "Active le capteur intégré ou choisis un capteur d'occupation existant."
     }
   },
   "options": {
@@ -64,12 +58,9 @@
       "general_settings": {
         "title": "Paramètres généraux",
         "data": {
-          "create_occupancy_sensor": "Créer le capteur « Maison occupée » (actif quand quelqu'un est présent)",
-          "home_occupancy_sensor": "Ou utiliser un capteur d'occupation existant",
-          "occupied_state": "État quand la maison est occupée",
-          "proximity_threshold": "Seuil de proximité (mètres)",
-          "occupancy_persons": "Personnes prises en compte par le capteur « Maison occupée » (vide = toutes)",
-          "occupancy_sensor_name": "Nom du capteur intégré « Maison occupée »"
+          "occupancy_sensor_name": "Nom du capteur « Maison occupée »",
+          "occupancy_persons": "Personnes prises en compte par le capteur « Maison occupée »",
+          "proximity_threshold": "Seuil de proximité (mètres)"
         }
       },
       "add_person": {
@@ -120,9 +111,6 @@
           "notification_service": "Service de notification"
         }
       }
-    },
-    "error": {
-      "occupancy_required": "Active le capteur intégré ou choisis un capteur d'occupation existant."
     }
   },
   "services": {

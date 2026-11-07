@@ -13,20 +13,16 @@ from homeassistant.helpers import selector
 
 from .const import (
     CONF_ALWAYS_HOME_DEVICES,
-    CONF_CREATE_OCCUPANCY_SENSOR,
     CONF_DEVICE_NAME,
     CONF_DISTANCE_SENSOR,
-    CONF_HOME_OCCUPANCY_SENSOR,
     CONF_NOTIFICATION_SERVICE,
     CONF_OCCUPANCY_PERSONS,
     CONF_OCCUPANCY_SENSOR_NAME,
-    CONF_OCCUPIED_STATE,
     CONF_PERSON_ID,
     CONF_PERSON_NAME,
     CONF_PERSONS,
     CONF_PROXIMITY_THRESHOLD,
     DEFAULT_OCCUPANCY_SENSOR_NAME,
-    DEFAULT_OCCUPIED_STATE,
     DEFAULT_PROXIMITY_THRESHOLD,
     DOMAIN,
 )
@@ -69,27 +65,14 @@ class NotifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if self._async_current_entries():
             return self.async_abort(reason="single_instance_allowed")
 
-        errors: dict[str, str] = {}
         if user_input is not None:
-            if not user_input.get(CONF_CREATE_OCCUPANCY_SENSOR) and not user_input.get(
-                CONF_HOME_OCCUPANCY_SENSOR
-            ):
-                errors["base"] = "occupancy_required"
-            else:
-                self._data.update(user_input)
-                return await self.async_step_menu()
+            self._data.update(user_input)
+            return await self.async_step_menu()
 
         schema = vol.Schema(
             {
                 vol.Required(
-                    CONF_CREATE_OCCUPANCY_SENSOR, default=True
-                ): selector.BooleanSelector(),
-                vol.Optional(
                     CONF_OCCUPANCY_SENSOR_NAME, default=DEFAULT_OCCUPANCY_SENSOR_NAME
-                ): selector.TextSelector(),
-                vol.Optional(CONF_HOME_OCCUPANCY_SENSOR): selector.EntitySelector(),
-                vol.Required(
-                    CONF_OCCUPIED_STATE, default=DEFAULT_OCCUPIED_STATE
                 ): selector.TextSelector(),
                 vol.Required(
                     CONF_PROXIMITY_THRESHOLD, default=DEFAULT_PROXIMITY_THRESHOLD
@@ -101,7 +84,7 @@ class NotifierConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             }
         )
 
-        return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+        return self.async_show_form(step_id="user", data_schema=schema)
 
     async def async_step_menu(
         self, user_input: dict[str, Any] | None = None
@@ -204,60 +187,41 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
     async def async_step_general_settings(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Edit general settings."""
-        errors: dict[str, str] = {}
+        """Edit general settings and which persons the occupancy sensor covers."""
+        names = [
+            p[CONF_PERSON_NAME]
+            for p in self._options.get(CONF_PERSONS, [])
+            if p.get(CONF_PERSON_NAME)
+        ]
         if user_input is not None:
-            if not user_input.get(CONF_CREATE_OCCUPANCY_SENSOR) and not user_input.get(
-                CONF_HOME_OCCUPANCY_SENSOR
-            ):
-                errors["base"] = "occupancy_required"
-            else:
-                self._options.update(user_input)
-                # A cleared optional field is absent from user_input: store it explicitly.
-                self._options[CONF_HOME_OCCUPANCY_SENSOR] = user_input.get(
-                    CONF_HOME_OCCUPANCY_SENSOR, ""
-                )
-                self._options[CONF_OCCUPANCY_PERSONS] = user_input.get(CONF_OCCUPANCY_PERSONS, [])
-                return await self.async_step_init()
+            self._options.update(user_input)
+            # An emptied multi-select is absent from user_input: store the explicit list.
+            self._options[CONF_OCCUPANCY_PERSONS] = [
+                n for n in user_input.get(CONF_OCCUPANCY_PERSONS, []) if n in names
+            ]
+            return await self.async_step_init()
+
+        # No stored list yet = every person counts, so show them all selected.
+        stored = self._options.get(CONF_OCCUPANCY_PERSONS)
+        selected = names if stored is None else [n for n in stored if n in names]
 
         schema = vol.Schema(
             {
                 vol.Required(
-                    CONF_CREATE_OCCUPANCY_SENSOR,
-                    default=self._options.get(CONF_CREATE_OCCUPANCY_SENSOR, False),
-                ): selector.BooleanSelector(),
-                vol.Optional(
-                    CONF_HOME_OCCUPANCY_SENSOR,
-                    description={
-                        "suggested_value": self._options.get(CONF_HOME_OCCUPANCY_SENSOR) or None
-                    },
-                ): selector.EntitySelector(),
-                vol.Optional(
                     CONF_OCCUPANCY_SENSOR_NAME,
                     default=self._options.get(
                         CONF_OCCUPANCY_SENSOR_NAME, DEFAULT_OCCUPANCY_SENSOR_NAME
                     ),
                 ): selector.TextSelector(),
                 vol.Optional(
-                    CONF_OCCUPANCY_PERSONS,
-                    description={
-                        "suggested_value": self._options.get(CONF_OCCUPANCY_PERSONS) or []
-                    },
+                    CONF_OCCUPANCY_PERSONS, description={"suggested_value": selected}
                 ): selector.SelectSelector(
                     selector.SelectSelectorConfig(
-                        options=[
-                            p[CONF_PERSON_NAME]
-                            for p in self._options.get(CONF_PERSONS, [])
-                            if p.get(CONF_PERSON_NAME)
-                        ],
+                        options=names,
                         multiple=True,
                         mode=selector.SelectSelectorMode.DROPDOWN,
                     )
                 ),
-                vol.Required(
-                    CONF_OCCUPIED_STATE,
-                    default=self._options.get(CONF_OCCUPIED_STATE, DEFAULT_OCCUPIED_STATE),
-                ): selector.TextSelector(),
                 vol.Required(
                     CONF_PROXIMITY_THRESHOLD,
                     default=self._options.get(
@@ -271,9 +235,17 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
             }
         )
 
-        return self.async_show_form(
-            step_id="general_settings", data_schema=schema, errors=errors
-        )
+        return self.async_show_form(step_id="general_settings", data_schema=schema)
+
+    def _sync_occupancy_persons(self, old: str | None, new: str | None) -> None:
+        """Keep the occupancy selection coherent when a person is added, renamed or removed."""
+        stored = self._options.get(CONF_OCCUPANCY_PERSONS)
+        if stored is None:
+            return  # no explicit list: everyone counts, nothing to sync
+        stored = [n for n in stored if n != old]
+        if new:
+            stored.append(new)
+        self._options[CONF_OCCUPANCY_PERSONS] = stored
 
     async def async_step_add_person(
         self, user_input: dict[str, Any] | None = None
@@ -283,6 +255,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
             persons = list(self._options.get(CONF_PERSONS, []))
             persons.append(user_input)
             self._options[CONF_PERSONS] = persons
+            self._sync_occupancy_persons(None, user_input.get(CONF_PERSON_NAME))
             return await self.async_step_init()
 
         schema = vol.Schema(
@@ -314,8 +287,9 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             idx = int(user_input["person_index"])
             if user_input.get("action") == "delete":
-                persons.pop(idx)
+                removed = persons.pop(idx)
                 self._options[CONF_PERSONS] = persons
+                self._sync_occupancy_persons(removed.get(CONF_PERSON_NAME), None)
                 return await self.async_step_init()
             # Edit
             self._selected_item_index = idx
@@ -359,8 +333,11 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
         person = persons[idx]
 
         if user_input is not None:
+            old_name = person.get(CONF_PERSON_NAME)
             persons[idx] = user_input
             self._options[CONF_PERSONS] = persons
+            if old_name != user_input.get(CONF_PERSON_NAME):
+                self._sync_occupancy_persons(old_name, user_input.get(CONF_PERSON_NAME))
             self._selected_item_index = None
             return await self.async_step_init()
 

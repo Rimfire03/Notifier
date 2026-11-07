@@ -3,13 +3,10 @@
     "step": {
       "user": {
         "title": "Notifier Configuration",
-        "description": "Choose how home occupancy is detected, and the proximity threshold.",
+        "description": "The \"Home occupied\" sensor is created automatically. Choose its name and the proximity threshold.",
         "data": {
-          "create_occupancy_sensor": "Create the \"Home occupied\" sensor (on when someone is home)",
-          "home_occupancy_sensor": "Or use an existing occupancy sensor",
-          "occupied_state": "State when home is occupied (e.g. on, Occupied, Home)",
-          "proximity_threshold": "Proximity Threshold (meters)",
-          "occupancy_sensor_name": "Name of the built-in \"Home occupied\" sensor"
+          "occupancy_sensor_name": "Name of the \"Home occupied\" sensor",
+          "proximity_threshold": "Proximity Threshold (meters)"
         }
       },
       "menu": {
@@ -42,9 +39,6 @@
     },
     "abort": {
       "single_instance_allowed": "Only a single configuration of Notifier is allowed."
-    },
-    "error": {
-      "occupancy_required": "Enable the built-in sensor or choose an existing occupancy sensor."
     }
   },
   "options": {
@@ -64,12 +58,9 @@
       "general_settings": {
         "title": "General Settings",
         "data": {
-          "create_occupancy_sensor": "Create the \"Home occupied\" sensor (on when someone is home)",
-          "home_occupancy_sensor": "Or use an existing occupancy sensor",
-          "occupied_state": "State when home is occupied",
-          "proximity_threshold": "Proximity Threshold (meters)",
-          "occupancy_persons": "Persons counted by the \"Home occupied\" sensor (empty = all)",
-          "occupancy_sensor_name": "Name of the built-in \"Home occupied\" sensor"
+          "occupancy_sensor_name": "Name of the \"Home occupied\" sensor",
+          "occupancy_persons": "Persons counted by the \"Home occupied\" sensor",
+          "proximity_threshold": "Proximity Threshold (meters)"
         }
       },
       "add_person": {
@@ -120,9 +111,6 @@
           "notification_service": "Notification Service"
         }
       }
-    },
-    "error": {
-      "occupancy_required": "Enable the built-in sensor or choose an existing occupancy sensor."
     }
   },
   "services": {

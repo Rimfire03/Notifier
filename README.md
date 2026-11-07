@@ -64,7 +64,7 @@ Copy `custom_components/notifier` into your Home Assistant `custom_components` f
 
 Entirely from the UI: **Settings → Devices & services → Add integration → Notifier**.
 
-1. Home occupancy: let Notifier **create the "Home occupied" sensor** (on when at least one configured person is home; in **Configure → General settings** you can limit it to chosen persons), or pick an existing sensor and its occupied state. You can name that sensor yourself. Then the proximity threshold.
+1. Name the **"Home occupied" sensor** (created automatically: on when at least one selected person is home) and set the proximity threshold. In **Configure → General settings** you choose which persons it counts; the sensor lists them in its `persons` and `persons_home` attributes.
 2. Add each **person** (name, `person.*`/`device_tracker.*` entity, notification service, optional distance sensor). The name is used in `send_to_<name>`.
 3. Add **always-home devices** (wall tablets...).
 4. Change anything later via the integration's **Configure** button.
@@ -145,7 +145,7 @@ Copiez `custom_components/notifier` dans le dossier `custom_components` de Home 
 
 Entièrement via l'interface : **Paramètres → Appareils et services → Ajouter une intégration → Notifier**.
 
-1. Occupation de la maison : laissez Notifier **créer le capteur « Maison occupée »** (actif dès qu'au moins une personne configurée est à la maison ; dans **Configurer → Paramètres généraux** on peut le limiter à certaines personnes), ou choisissez un capteur existant et son état « occupé ». Vous pouvez choisir son nom. Puis le seuil de proximité.
+1. Nommez le **capteur « Maison occupée »** (créé automatiquement : actif dès qu'au moins une personne sélectionnée est à la maison) et réglez le seuil de proximité. Dans **Configurer → Paramètres généraux**, choisissez les personnes prises en compte ; le capteur les liste dans ses attributs `persons` et `persons_home`.
 2. Ajoutez chaque **personne** (nom, entité `person.*`/`device_tracker.*`, service de notification, capteur de distance optionnel). Le nom sert dans `send_to_<nom>`.
 3. Ajoutez les **appareils toujours présents** (tablettes murales...).
 4. Modifiez tout plus tard avec le bouton **Configurer** de l'intégration.

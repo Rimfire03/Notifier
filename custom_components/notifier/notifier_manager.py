@@ -18,15 +18,11 @@ from .const import (
     CONF_ALWAYS_HOME_DEVICES,
     CONF_DEVICE_NAME,
     CONF_DISTANCE_SENSOR,
-    CONF_CREATE_OCCUPANCY_SENSOR,
-    CONF_HOME_OCCUPANCY_SENSOR,
     CONF_NOTIFICATION_SERVICE,
-    CONF_OCCUPIED_STATE,
     CONF_PERSON_ID,
     CONF_PERSON_NAME,
     CONF_PERSONS,
     CONF_PROXIMITY_THRESHOLD,
-    DEFAULT_OCCUPIED_STATE,
     DEFAULT_PROXIMITY_THRESHOLD,
     DOMAIN,
     EVENT_MOBILE_APP_ACTION,
@@ -87,27 +83,17 @@ class NotifierManager:
 
     @property
     def home_occupancy_sensor(self) -> str:
-        """Return the occupancy sensor entity id (the built-in one when enabled)."""
-        if self.config.get(CONF_CREATE_OCCUPANCY_SENSOR):
-            return er.async_get(self.hass).async_get_entity_id(
-                "binary_sensor",
-                DOMAIN,
-                f"{self.config.get('entry_id')}_{OCCUPANCY_SENSOR_UNIQUE_SUFFIX}",
-            ) or ""
-        sensor = self.config.get(CONF_HOME_OCCUPANCY_SENSOR, "")
-        if isinstance(sensor, dict):
-            return sensor.get("id", "")
-        return str(sensor)
+        """Entity id of the built-in occupancy sensor (empty until it is registered)."""
+        return er.async_get(self.hass).async_get_entity_id(
+            "binary_sensor",
+            DOMAIN,
+            f"{self.config.get('entry_id')}_{OCCUPANCY_SENSOR_UNIQUE_SUFFIX}",
+        ) or ""
 
     @property
     def occupied_state(self) -> str:
-        """Return the occupied state value."""
-        if self.config.get(CONF_CREATE_OCCUPANCY_SENSOR):
-            return "on"
-        sensor = self.config.get(CONF_HOME_OCCUPANCY_SENSOR, {})
-        if isinstance(sensor, dict) and "occupied_state" in sensor:
-            return str(sensor.get("occupied_state"))
-        return str(self.config.get(CONF_OCCUPIED_STATE, DEFAULT_OCCUPIED_STATE))
+        """State of the built-in sensor when the home is occupied."""
+        return "on"
 
     @property
     def proximity_threshold(self) -> float:
