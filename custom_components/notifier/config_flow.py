@@ -47,6 +47,51 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+LABELS = {
+    "fr": {
+        "manage_action": {"edit": "Modifier", "delete": "Supprimer"},
+        "consumption_type": {
+            "cumulative": "Compteur cumulatif (kWh, m³, L)",
+            "instant": "Valeur instantanée (W, L/min)",
+        },
+        "consumption_rule": {
+            "threshold": "Seuil sur une fenêtre de temps",
+            "continuous": "Débit continu (fuite possible)",
+            "habit": "Inhabituel par rapport aux heures habituelles",
+        },
+        "target": {
+            ACTION_SEND_TO_ALL: "Tout le monde (personnes et appareils)",
+            ACTION_SEND_TO_PRESENT: "Personnes à la maison",
+            ACTION_SEND_TO_ABSENT: "Personnes absentes",
+            ACTION_SEND_TO_NEAREST: "Personne la plus proche",
+        },
+    },
+    "en": {
+        "manage_action": {"edit": "Edit", "delete": "Delete"},
+        "consumption_type": {
+            "cumulative": "Cumulative meter (kWh, m³, L)",
+            "instant": "Instant value (W, L/min)",
+        },
+        "consumption_rule": {
+            "threshold": "Threshold over a time window",
+            "continuous": "Continuous flow (possible leak)",
+            "habit": "Unusual compared to usual hours",
+        },
+        "target": {
+            ACTION_SEND_TO_ALL: "Everyone (persons and devices)",
+            ACTION_SEND_TO_PRESENT: "Persons at home",
+            ACTION_SEND_TO_ABSENT: "Persons away",
+            ACTION_SEND_TO_NEAREST: "Nearest person",
+        },
+    },
+}
+
+
+def _options(hass: HomeAssistant, group: str, values: list[str]) -> list[selector.SelectOptionDict]:
+    """Labelled options. Built here because the options-flow dialog does not load selector translations."""
+    labels = LABELS["fr" if hass.config.language.startswith("fr") else "en"][group]
+    return [selector.SelectOptionDict(value=v, label=labels[v]) for v in values]
+
 
 def _notify_selector(hass: HomeAssistant) -> selector.SelectSelector:
     """Dropdown of existing notify services; custom value still allowed."""
@@ -330,7 +375,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 ),
                 vol.Required("action", default="edit"): selector.SelectSelector(
                     selector.SelectSelectorConfig(
-                        options=["edit", "delete"], translation_key="manage_action"
+                        options=_options(self.hass, "manage_action", ["edit", "delete"])
                     )
                 ),
             }
@@ -440,7 +485,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 ),
                 vol.Required("action", default="edit"): selector.SelectSelector(
                     selector.SelectSelectorConfig(
-                        options=["edit", "delete"], translation_key="manage_action"
+                        options=_options(self.hass, "manage_action", ["edit", "delete"])
                     )
                 ),
             }
@@ -494,12 +539,11 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 selector.NumberSelectorConfig(mode=selector.NumberSelectorMode.BOX, **kwargs)
             )
 
-        def choice(options: list[str], key: str, **kwargs: Any) -> selector.SelectSelector:
+        def choice(group: str, values: list[str], **kwargs: Any) -> selector.SelectSelector:
             return selector.SelectSelector(
                 selector.SelectSelectorConfig(
-                    options=options,
+                    options=_options(self.hass, group, values),
                     mode=selector.SelectSelectorMode.DROPDOWN,
-                    translation_key=key,
                     **kwargs,
                 )
             )
@@ -510,12 +554,8 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 req(MON_ENTITY): selector.EntitySelector(
                     selector.EntitySelectorConfig(domain="sensor")
                 ),
-                req(MON_TYPE, "cumulative"): choice(
-                    ["cumulative", "instant"], "consumption_type"
-                ),
-                req(MON_RULE, "threshold"): choice(
-                    ["threshold", "continuous", "habit"], "consumption_rule"
-                ),
+                req(MON_TYPE, "cumulative"): choice("consumption_type", ["cumulative", "instant"]),
+                req(MON_RULE, "threshold"): choice("consumption_rule", ["threshold", "continuous", "habit"]),
                 opt(MON_THRESHOLD): number(min=0, step="any"),
                 opt(MON_WINDOW, 60): number(min=1, max=1440, step=1, unit_of_measurement="min"),
                 opt(MON_HOURS, 6): number(min=0.5, max=72, step="any", unit_of_measurement="h"),
@@ -523,13 +563,13 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 opt(MON_FACTOR, 2): number(min=1, step="any"),
                 opt(MON_COOLDOWN, 60): number(min=1, max=10080, step=1, unit_of_measurement="min"),
                 req(MON_TARGET, ACTION_SEND_TO_ALL): choice(
+                    "target",
                     [
                         ACTION_SEND_TO_ALL,
                         ACTION_SEND_TO_PRESENT,
                         ACTION_SEND_TO_ABSENT,
                         ACTION_SEND_TO_NEAREST,
                     ],
-                    "target",
                     custom_value=True,
                 ),
             }
@@ -595,7 +635,7 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
                 ),
                 vol.Required("action", default="edit"): selector.SelectSelector(
                     selector.SelectSelectorConfig(
-                        options=["edit", "delete"], translation_key="manage_action"
+                        options=_options(self.hass, "manage_action", ["edit", "delete"])
                     )
                 ),
             }

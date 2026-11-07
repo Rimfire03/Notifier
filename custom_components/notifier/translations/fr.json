@@ -245,25 +245,6 @@
         "send_to_nearest": "Personne la plus proche",
         "send_when_present": "Quand la maison est occupée"
       }
-    },
-    "consumption_type": {
-      "options": {
-        "cumulative": "Compteur cumulatif (kWh, m³, L)",
-        "instant": "Valeur instantanée (W, L/min)"
-      }
-    },
-    "consumption_rule": {
-      "options": {
-        "threshold": "Seuil sur une fenêtre de temps",
-        "continuous": "Débit continu (fuite possible)",
-        "habit": "Inhabituel par rapport aux heures habituelles"
-      }
-    },
-    "manage_action": {
-      "options": {
-        "edit": "Modifier",
-        "delete": "Supprimer"
-      }
     }
   }
 }

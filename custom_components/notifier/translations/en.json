@@ -245,25 +245,6 @@
         "send_to_nearest": "Nearest person",
         "send_when_present": "When home is occupied"
       }
-    },
-    "consumption_type": {
-      "options": {
-        "cumulative": "Cumulative meter (kWh, m³, L)",
-        "instant": "Instant value (W, L/min)"
-      }
-    },
-    "consumption_rule": {
-      "options": {
-        "threshold": "Threshold over a time window",
-        "continuous": "Continuous flow (possible leak)",
-        "habit": "Unusual compared to usual hours"
-      }
-    },
-    "manage_action": {
-      "options": {
-        "edit": "Edit",
-        "delete": "Delete"
-      }
     }
   }
 }
