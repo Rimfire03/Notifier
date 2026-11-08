@@ -170,6 +170,15 @@
         },
         "description": "Alerte si de l'eau est consommée pendant chacune des dernières heures, même en petite quantité."
       },
+      "monitor_leak": {
+        "title": "Règle fuite (débit continu + fuite lente)",
+        "data": {
+          "continuous_hours": "Débit continu avant alerte",
+          "slow_leak_hours": "Heures consécutives avec consommation (fuite lente)",
+          "cooldown_minutes": "Délai entre deux alertes"
+        },
+        "description": "Alerte dès que l'un des deux contrôles se déclenche."
+      },
       "monitor_habit": {
         "title": "Règle habitude",
         "data": {

@@ -30,6 +30,7 @@ from .const import (
     MON_ENTITY,
     MON_FACTOR,
     MON_HOURS,
+    MON_SLOW_HOURS,
     MON_ID,
     MON_NAME,
     MON_RULE,
@@ -99,6 +100,8 @@ class ConsumptionMonitor:
         self.threshold = float(cfg.get(MON_THRESHOLD) or 0)
         self.window = float(cfg.get(MON_WINDOW) or 60)
         self.hours = float(cfg.get(MON_HOURS) or 6)
+        self.slow_hours = float(cfg.get(MON_SLOW_HOURS) or 6)
+        self.kind = self.rule  # message to send; a "leak" monitor switches it per check
         # Habit rule: fixed history and sensitivity, the user only picks the alert time.
         self.days = int(cfg.get(MON_DAYS) or HABIT_DAYS)
         self.factor = float(cfg.get(MON_FACTOR) or HABIT_FACTOR)
@@ -172,29 +175,23 @@ class ConsumptionMonitor:
     def evaluate(self, now: float) -> tuple[bool, float, float]:
         """Return (abnormal, measured value, limit)."""
         if self.rule == "continuous":
-            streak = 0.0
-            if (
-                self._streak_start is not None
-                and self._last_active is not None
-                and now - self._last_active <= CONTINUOUS_GAP
+            return self._continuous(now, self.hours)
+
+        if self.rule == "slow_leak":
+            return self._slow_leak(now, self.hours)
+
+        if self.rule == "leak":  # both leak checks in one monitor; kind tells which one fired
+            for kind, result in (
+                ("continuous", self._continuous(now, self.hours)),
+                ("slow_leak", self._slow_leak(now, self.slow_hours)),
             ):
-                streak = (self._last_active - self._streak_start) / 3600  # observed flow only
-            return streak >= self.hours, streak, self.hours
+                if result[0]:
+                    self.kind = kind
+                    return result
+            return False, 0.0, self.hours
 
         if self.rule == "habit":
             return self._evaluate_habit(now)
-
-        if self.rule == "slow_leak":
-            # Water used in every one of the last N full hours, whatever the amount.
-            n = max(int(self.hours), 1)
-            first = min(self.buckets, default=None)
-            hours = range(1, n + 1)
-            covered = first is not None and self._hour_key(now, 0, n) >= first
-            leak = covered and all(
-                self._bucket_value(self.buckets.get(self._hour_key(now, 0, h)), self.cumulative) > 0
-                for h in hours
-            )
-            return leak, float(n if leak else 0), float(n)
 
         horizon = now - self.window * 60
         while self._samples and self._samples[0][0] < horizon:
@@ -204,6 +201,26 @@ class ConsumptionMonitor:
             return False, 0.0, self.threshold
         total = sum(values) if self.cumulative else sum(values) / len(values)
         return total > self.threshold, total, self.threshold
+
+    def _continuous(self, now: float, hours: float) -> tuple[bool, float, float]:
+        streak = 0.0
+        if (
+            self._streak_start is not None
+            and self._last_active is not None
+            and now - self._last_active <= CONTINUOUS_GAP
+        ):
+            streak = (self._last_active - self._streak_start) / 3600  # observed flow only
+        return streak >= hours, streak, hours
+
+    def _slow_leak(self, now: float, hours: float) -> tuple[bool, float, float]:
+        """Water used in every one of the last N full hours, whatever the amount."""
+        n = max(int(hours), 1)
+        first = min(self.buckets, default=None)
+        leak = first is not None and self._hour_key(now, 0, n) >= first and all(
+            self._bucket_value(self.buckets.get(self._hour_key(now, 0, h)), self.cumulative) > 0
+            for h in range(1, n + 1)
+        )
+        return leak, float(n if leak else 0), float(n)
 
     def _day_total(self, now: float, days_back: int) -> float:
         """Consumption over the 24 h ending at `now`, shifted back by days_back days.
@@ -363,7 +380,7 @@ class ConsumptionManager:
 
     async def _notify(self, m: ConsumptionMonitor, value: float, limit: float) -> None:
         texts = MESSAGES["fr" if self.hass.config.language.startswith("fr") else "en"]
-        message = texts[m.rule].format(
+        message = texts[m.kind].format(
             name=m.name, value=value, limit=limit, unit=m.unit, window=m.window
         )
         data: dict[str, Any] = {

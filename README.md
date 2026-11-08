@@ -119,6 +119,7 @@ Each monitor creates a problem `binary_sensor` (named after the monitor) that yo
 | Threshold | threshold, time window, delay between alerts | consumption over the window exceeds the threshold (cumulative: increase; instant: average). Repeats after the delay while it lasts |
 | Continuous | duration, delay between alerts | the meter keeps moving for the whole duration without a pause of 20 min or more (running flow) |
 | Slow leak | duration (hours), delay between alerts | water is used during each of the last N full hours, even in small amounts (possible leak) |
+| Leak (both) | continuous duration, slow-leak hours, delay between alerts | continuous flow and slow leak checked in one monitor; alerts when either triggers |
 | Habit | alert time, days of history (default 7), N (default 1.5) | once a day, at the alert time, the last 24 h exceed N times the average of the same 24 h over the previous days (at least 3 days of history, recorded by the integration itself) |
 
 The habit alert carries two buttons: **It was normal** (turns the sensor off and fires the `notifier_consumption_normal` event with `name` and `entity_id`) and **Close**. Both dismiss the notification on every device. Buttons need a phone using the Companion app.
@@ -186,6 +187,7 @@ Chaque surveillance crée un `binary_sensor` de type problème (du nom de la sur
 | Seuil | seuil, fenêtre de temps, délai entre deux alertes | la consommation sur la fenêtre dépasse le seuil (cumulatif : augmentation ; instantané : moyenne). Se répète après le délai tant que ça dure |
 | Continu | durée, délai entre deux alertes | le compteur bouge sans pause d'au moins 20 min pendant toute la durée (débit en cours) |
 | Fuite lente | durée (heures), délai entre deux alertes | de l'eau est consommée pendant chacune des N dernières heures pleines, même en petite quantité (fuite possible) |
+| Fuite (les deux) | durée du débit continu, heures de fuite lente, délai entre deux alertes | débit continu et fuite lente contrôlés dans une seule surveillance ; alerte dès que l'un se déclenche |
 | Habitude | heure d'envoi, jours d'historique (7 par défaut), N (1,5 par défaut) | une fois par jour, à l'heure choisie, les dernières 24 h dépassent N fois la moyenne des mêmes 24 h des jours précédents (3 jours d'historique minimum, enregistrés par l'intégration elle-même) |
 
 L'alerte « habitude » porte deux boutons : **C'était normal** (éteint le capteur et déclenche l'événement `notifier_consumption_normal` avec `name` et `entity_id`) et **Fermer**. Les deux suppriment la notification sur tous les appareils. Les boutons nécessitent un téléphone avec l'app Companion.

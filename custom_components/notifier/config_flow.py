@@ -25,6 +25,7 @@ from .const import (
     MON_ENTITY,
     MON_FACTOR,
     MON_HOURS,
+    MON_SLOW_HOURS,
     MON_ID,
     MON_NAME,
     MON_RULE,
@@ -61,6 +62,7 @@ LABELS = {
             "threshold": "Seuil sur une fenêtre de temps",
             "continuous": "Débit continu (fuite possible)",
             "slow_leak": "Fuite lente (consommation à chaque heure)",
+            "leak": "Fuite : débit continu + fuite lente",
             "habit": "Inhabituel par rapport aux heures habituelles",
         },
         "target": {
@@ -81,6 +83,7 @@ LABELS = {
             "threshold": "Threshold over a time window",
             "continuous": "Continuous flow (possible leak)",
             "slow_leak": "Slow leak (consumption every hour)",
+            "leak": "Leak: continuous flow + slow leak",
             "habit": "Unusual compared to usual hours",
         },
         "target": {
@@ -152,7 +155,7 @@ def _notify_selector(hass: HomeAssistant) -> selector.SelectSelector:
 
 # Durations are entered as hours/minutes/seconds. Stored value = minutes / divisor
 # (so existing numeric options keep working).
-DURATION_KEYS = {MON_WINDOW: 1, MON_HOURS: 60, MON_COOLDOWN: 1}
+DURATION_KEYS = {MON_WINDOW: 1, MON_HOURS: 60, MON_SLOW_HOURS: 60, MON_COOLDOWN: 1}
 
 # (key, default, spec): spec dict = number selector kwargs, None = duration (default in
 # minutes), "time" = time of day.
@@ -168,6 +171,12 @@ RULE_FIELDS: dict[str, list[tuple[str, Any, dict[str, Any] | str | None]]] = {
     ],
     "slow_leak": [
         (MON_HOURS, 360, None),
+        (MON_COOLDOWN, 360, None),
+    ],
+    # Continuous flow and slow leak checked together.
+    "leak": [
+        (MON_HOURS, 120, None),
+        (MON_SLOW_HOURS, 360, None),
         (MON_COOLDOWN, 360, None),
     ],
     # Checked once a day over 24 h: compared with the average of the previous days.
@@ -745,6 +754,11 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         return await self._rule_step("slow_leak", user_input)
+
+    async def async_step_monitor_leak(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        return await self._rule_step("leak", user_input)
 
     async def async_step_monitor_habit(
         self, user_input: dict[str, Any] | None = None
