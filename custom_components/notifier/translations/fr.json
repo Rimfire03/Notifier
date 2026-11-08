@@ -162,6 +162,14 @@
           "cooldown_minutes": "Délai entre deux alertes"
         }
       },
+      "monitor_slow_leak": {
+        "title": "Règle fuite lente",
+        "data": {
+          "continuous_hours": "Heures consécutives avec consommation avant alerte",
+          "cooldown_minutes": "Délai entre deux alertes"
+        },
+        "description": "Alerte si de l'eau est consommée pendant chacune des dernières heures, même en petite quantité."
+      },
       "monitor_habit": {
         "title": "Règle habitude",
         "data": {

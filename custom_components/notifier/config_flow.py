@@ -60,6 +60,7 @@ LABELS = {
         "consumption_rule": {
             "threshold": "Seuil sur une fenêtre de temps",
             "continuous": "Débit continu (fuite possible)",
+            "slow_leak": "Fuite lente (consommation à chaque heure)",
             "habit": "Inhabituel par rapport aux heures habituelles",
         },
         "target": {
@@ -79,6 +80,7 @@ LABELS = {
         "consumption_rule": {
             "threshold": "Threshold over a time window",
             "continuous": "Continuous flow (possible leak)",
+            "slow_leak": "Slow leak (consumption every hour)",
             "habit": "Unusual compared to usual hours",
         },
         "target": {
@@ -163,6 +165,10 @@ RULE_FIELDS: dict[str, list[tuple[str, Any, dict[str, Any] | str | None]]] = {
     "continuous": [
         (MON_HOURS, 360, None),
         (MON_COOLDOWN, 60, None),
+    ],
+    "slow_leak": [
+        (MON_HOURS, 360, None),
+        (MON_COOLDOWN, 360, None),
     ],
     # Checked once a day over 24 h: compared with the average of the previous days.
     "habit": [
@@ -734,6 +740,11 @@ class NotifierOptionsFlow(config_entries.OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         return await self._rule_step("continuous", user_input)
+
+    async def async_step_monitor_slow_leak(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        return await self._rule_step("slow_leak", user_input)
 
     async def async_step_monitor_habit(
         self, user_input: dict[str, Any] | None = None

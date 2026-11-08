@@ -47,7 +47,7 @@ Notifier is fully backwards-compatible with the former AppDaemon `notifier.py` a
 - ⏱️ **Watchers (`until`):** automatically dismiss a notification once an entity reaches a state (light off, home occupied...).
 - 🔔 **Services:** `notifier.send` and `notifier.discard`, in addition to the events.
 - 🏠 **"Home occupied" sensor:** created automatically, on when a selected person is home.
-- 💧 **Consumption monitoring (optional):** alerts for abnormal water / electricity use (threshold, continuous flow, daily habit with "it was normal" / "close" buttons). Sources can be picked straight from the Energy dashboard, see below.
+- 💧 **Consumption monitoring (optional):** alerts for abnormal water / electricity use (threshold, continuous flow, slow leak, daily habit with "it was normal" / "close" buttons). Sources can be picked straight from the Energy dashboard, see below.
 
 ## 📦 Installation
 
@@ -117,7 +117,8 @@ Each monitor creates a problem `binary_sensor` (named after the monitor) that yo
 | Rule | Fields | Alert when |
 |------|--------|-----------|
 | Threshold | threshold, time window, delay between alerts | consumption over the window exceeds the threshold (cumulative: increase; instant: average). Repeats after the delay while it lasts |
-| Continuous | duration, delay between alerts | the meter keeps moving for the whole duration without a pause of 1 h or more (possible leak) |
+| Continuous | duration, delay between alerts | the meter keeps moving for the whole duration without a pause of 20 min or more (running flow) |
+| Slow leak | duration (hours), delay between alerts | water is used during each of the last N full hours, even in small amounts (possible leak) |
 | Habit | alert time, days of history (default 7), N (default 1.5) | once a day, at the alert time, the last 24 h exceed N times the average of the same 24 h over the previous days (at least 3 days of history, recorded by the integration itself) |
 
 The habit alert carries two buttons: **It was normal** (turns the sensor off and fires the `notifier_consumption_normal` event with `name` and `entity_id`) and **Close**. Both dismiss the notification on every device. Buttons need a phone using the Companion app.
@@ -143,7 +144,7 @@ Notifier est entièrement rétrocompatible avec l'ancienne app AppDaemon `notifi
 - ⏱️ **Surveillance (`until`) :** supprime automatiquement la notification quand une entité atteint un état (lumière éteinte, maison occupée...).
 - 🔔 **Services :** `notifier.send` et `notifier.discard`, en plus des événements.
 - 🏠 **Capteur « Maison occupée » :** créé automatiquement, actif quand une personne sélectionnée est à la maison.
-- 💧 **Surveillance de la consommation (optionnelle) :** alertes de consommation anormale d'eau / d'électricité (seuil, débit continu, habitude quotidienne avec boutons « C'était normal » / « Fermer »). Les sources se choisissent directement dans le tableau de bord Énergie, voir plus bas.
+- 💧 **Surveillance de la consommation (optionnelle) :** alertes de consommation anormale d'eau / d'électricité (seuil, débit continu, fuite lente, habitude quotidienne avec boutons « C'était normal » / « Fermer »). Les sources se choisissent directement dans le tableau de bord Énergie, voir plus bas.
 
 ## 📦 Installation
 
@@ -183,7 +184,8 @@ Chaque surveillance crée un `binary_sensor` de type problème (du nom de la sur
 | Règle | Champs | Alerte quand |
 |-------|--------|-------------|
 | Seuil | seuil, fenêtre de temps, délai entre deux alertes | la consommation sur la fenêtre dépasse le seuil (cumulatif : augmentation ; instantané : moyenne). Se répète après le délai tant que ça dure |
-| Continu | durée, délai entre deux alertes | le compteur bouge sans pause d'au moins 1 h pendant toute la durée (fuite possible) |
+| Continu | durée, délai entre deux alertes | le compteur bouge sans pause d'au moins 20 min pendant toute la durée (débit en cours) |
+| Fuite lente | durée (heures), délai entre deux alertes | de l'eau est consommée pendant chacune des N dernières heures pleines, même en petite quantité (fuite possible) |
 | Habitude | heure d'envoi, jours d'historique (7 par défaut), N (1,5 par défaut) | une fois par jour, à l'heure choisie, les dernières 24 h dépassent N fois la moyenne des mêmes 24 h des jours précédents (3 jours d'historique minimum, enregistrés par l'intégration elle-même) |
 
 L'alerte « habitude » porte deux boutons : **C'était normal** (éteint le capteur et déclenche l'événement `notifier_consumption_normal` avec `name` et `entity_id`) et **Fermer**. Les deux suppriment la notification sur tous les appareils. Les boutons nécessitent un téléphone avec l'app Companion.

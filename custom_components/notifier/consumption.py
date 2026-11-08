@@ -61,6 +61,7 @@ MESSAGES = {
         "close": "Fermer",
         "threshold": "Consommation anormale sur « {name} » : {value:.2f} {unit} en {window:g} min (seuil {limit:g} {unit}).",
         "continuous": "Consommation continue sur « {name} » depuis {value:.1f} h (limite {limit:g} h) : fuite possible.",
+        "slow_leak": "Fuite lente possible sur « {name} » : consommation à chaque heure depuis {value:.0f} h (limite {limit:g} h).",
         "habit": "Consommation inhabituelle sur « {name} » : {value:.2f} {unit} sur les dernières 24 h (alerte au-delà de {limit:.2f} {unit}).",
     },
     "en": {
@@ -69,6 +70,7 @@ MESSAGES = {
         "close": "Close",
         "threshold": "Abnormal consumption on \"{name}\": {value:.2f} {unit} in {window:g} min (limit {limit:g} {unit}).",
         "continuous": "Continuous consumption on \"{name}\" for {value:.1f} h (limit {limit:g} h): possible leak.",
+        "slow_leak": "Possible slow leak on \"{name}\": consumption every hour for {value:.0f} h (limit {limit:g} h).",
         "habit": "Unusual consumption on \"{name}\": {value:.2f} {unit} over the last 24 h (alert above {limit:.2f} {unit}).",
     },
 }
@@ -181,6 +183,18 @@ class ConsumptionMonitor:
 
         if self.rule == "habit":
             return self._evaluate_habit(now)
+
+        if self.rule == "slow_leak":
+            # Water used in every one of the last N full hours, whatever the amount.
+            n = max(int(self.hours), 1)
+            first = min(self.buckets, default=None)
+            hours = range(1, n + 1)
+            covered = first is not None and self._hour_key(now, 0, n) >= first
+            leak = covered and all(
+                self._bucket_value(self.buckets.get(self._hour_key(now, 0, h)), self.cumulative) > 0
+                for h in hours
+            )
+            return leak, float(n if leak else 0), float(n)
 
         horizon = now - self.window * 60
         while self._samples and self._samples[0][0] < horizon:
