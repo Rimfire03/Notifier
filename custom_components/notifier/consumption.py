@@ -43,7 +43,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 # Flow is "continuous" while the meter keeps moving with gaps shorter than this.
-CONTINUOUS_GAP = 3600
+CONTINUOUS_GAP = 1200  # max seconds between two increments for the flow to count as continuous
 # Minimum distinct days of history before the habit rule may alert.
 HABIT_MIN_DAYS = 3
 HABIT_DAYS = 7
@@ -176,7 +176,7 @@ class ConsumptionMonitor:
                 and self._last_active is not None
                 and now - self._last_active <= CONTINUOUS_GAP
             ):
-                streak = (now - self._streak_start) / 3600
+                streak = (self._last_active - self._streak_start) / 3600  # observed flow only
             return streak >= self.hours, streak, self.hours
 
         if self.rule == "habit":
