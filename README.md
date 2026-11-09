@@ -1,6 +1,6 @@
 # 🔔 Notifier
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 [![GitHub release](https://img.shields.io/github/v/release/Rimfire03/Notifier?include_prereleases)](https://github.com/Rimfire03/Notifier/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Donate-orange.svg?logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/slide598b)
@@ -51,12 +51,11 @@ Notifier is fully backwards-compatible with the former AppDaemon `notifier.py` a
 
 ## 📦 Installation
 
-### Method 1: Via HACS (custom repository)
+### Method 1: Via HACS
 
-1. In Home Assistant, open **HACS** → menu (⋮) → **Custom repositories**.
-2. Add `https://github.com/Rimfire03/Notifier`, category **Integration**.
-3. Search for **Notifier** in HACS and click **Download**.
-4. Restart Home Assistant.
+1. In Home Assistant, open **HACS** and search for **Notifier**.
+2. Click **Download**.
+3. Restart Home Assistant.
 
 ### Method 2: Manual
 
@@ -149,12 +148,11 @@ Notifier est entièrement rétrocompatible avec l'ancienne app AppDaemon `notifi
 
 ## 📦 Installation
 
-### Méthode 1 : Via HACS (dépôt personnalisé)
+### Méthode 1 : Via HACS
 
-1. Dans Home Assistant, ouvrez **HACS** → menu (⋮) → **Dépôts personnalisés**.
-2. Ajoutez `https://github.com/Rimfire03/Notifier`, catégorie **Intégration**.
-3. Recherchez **Notifier** dans HACS et cliquez sur **Télécharger**.
-4. Redémarrez Home Assistant.
+1. Dans Home Assistant, ouvrez **HACS** et recherchez **Notifier**.
+2. Cliquez sur **Télécharger**.
+3. Redémarrez Home Assistant.
 
 ### Méthode 2 : Manuelle
 
