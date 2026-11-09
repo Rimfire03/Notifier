@@ -161,7 +161,7 @@ class ConsumptionMonitor:
         else:
             self._streak_start = self._last_active = None
 
-        if self.rule == "threshold":  # other rules never read the window: keep it bounded
+        if self.rule in ("threshold", "leak"):  # other rules never read the window: keep it bounded
             self._samples.append((now, x))
 
         key = self._hour_key(now)
@@ -180,11 +180,13 @@ class ConsumptionMonitor:
         if self.rule == "slow_leak":
             return self._slow_leak(now, self.hours)
 
-        if self.rule == "leak":  # both leak checks in one monitor; kind tells which one fired
-            for kind, result in (
-                ("continuous", self._continuous(now, self.hours)),
-                ("slow_leak", self._slow_leak(now, self.slow_hours)),
-            ):
+        if self.rule == "leak":  # all leak checks in one monitor; kind tells which one fired
+            # An unset threshold (monitor saved before this field existed) disables that check.
+            checks = [("continuous", self._continuous(now, self.hours)),
+                      ("slow_leak", self._slow_leak(now, self.slow_hours))]
+            if self.threshold > 0:
+                checks.insert(0, ("threshold", self._threshold(now)))
+            for kind, result in checks:
                 if result[0]:
                     self.kind = kind
                     return result
@@ -193,6 +195,9 @@ class ConsumptionMonitor:
         if self.rule == "habit":
             return self._evaluate_habit(now)
 
+        return self._threshold(now)
+
+    def _threshold(self, now: float) -> tuple[bool, float, float]:
         horizon = now - self.window * 60
         while self._samples and self._samples[0][0] < horizon:
             self._samples.popleft()

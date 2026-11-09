@@ -171,13 +171,15 @@
         "description": "Alerts when water is used during each of the last hours, even in small amounts."
       },
       "monitor_leak": {
-        "title": "Leak rule (continuous flow + slow leak)",
+        "title": "Leak rule (volume + continuous flow + slow leak)",
         "data": {
+          "threshold": "Burst leak: volume (in the sensor's unit)",
+          "window_minutes": "Burst leak: within",
           "continuous_hours": "Continuous flow before alert",
           "slow_leak_hours": "Consecutive hours with consumption (slow leak)",
           "cooldown_minutes": "Delay between two alerts"
         },
-        "description": "Alerts as soon as either check triggers."
+        "description": "Alerts as soon as any of the three checks triggers."
       },
       "monitor_habit": {
         "title": "Habit rule",

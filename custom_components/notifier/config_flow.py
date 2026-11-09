@@ -62,7 +62,7 @@ LABELS = {
             "threshold": "Seuil sur une fenêtre de temps",
             "continuous": "Débit continu (fuite possible)",
             "slow_leak": "Fuite lente (consommation à chaque heure)",
-            "leak": "Fuite : débit continu + fuite lente",
+            "leak": "Fuite : volume + débit continu + fuite lente",
             "habit": "Inhabituel par rapport aux heures habituelles",
         },
         "target": {
@@ -83,7 +83,7 @@ LABELS = {
             "threshold": "Threshold over a time window",
             "continuous": "Continuous flow (possible leak)",
             "slow_leak": "Slow leak (consumption every hour)",
-            "leak": "Leak: continuous flow + slow leak",
+            "leak": "Leak: volume + continuous flow + slow leak",
             "habit": "Unusual compared to usual hours",
         },
         "target": {
@@ -173,8 +173,10 @@ RULE_FIELDS: dict[str, list[tuple[str, Any, dict[str, Any] | str | None]]] = {
         (MON_HOURS, 360, None),
         (MON_COOLDOWN, 360, None),
     ],
-    # Continuous flow and slow leak checked together.
+    # Burst volume (threshold over a window), continuous flow and slow leak checked together.
     "leak": [
+        (MON_THRESHOLD, 100, {"min": 0, "step": "any"}),
+        (MON_WINDOW, 10, None),
         (MON_HOURS, 120, None),
         (MON_SLOW_HOURS, 360, None),
         (MON_COOLDOWN, 360, None),
